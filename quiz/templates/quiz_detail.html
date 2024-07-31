@@ -5,10 +5,21 @@
 </head>
 <body>
     <h1>{{ quiz.title }}</h1>
-    <ul>
-        {% for question in questions %}
-            <li>{{ question.text }}</li>
-        {% endfor %}
-    </ul>
+    <form method="post">
+        {% csrf_token %}
+        <ul>
+            {% for question in questions %}
+                <li>{{ question.text }}
+                    <ul>
+                        <li><input type="radio" name="{{ question.id }}" value="A"> {{ question.option_a }}</li>
+                        <li><input type="radio" name="{{ question.id }}" value="B"> {{ question.option_b }}</li>
+                        <li><input type="radio" name="{{ question.id }}" value="C"> {{ question.option_c }}</li>
+                        <li><input type="radio" name="{{ question.id }}" value="D"> {{ question.option_d }}</li>
+                    </ul>
+                </li>
+            {% endfor %}
+        </ul>
+        <button type="submit">Submit</button>
+    </form>
 </body>
 </html>
