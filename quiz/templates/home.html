@@ -1,14 +1,29 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html>
 <head>
     <title>Quizzes</title>
+    <link href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet">
 </head>
 <body>
-    <h1>Quizzes</h1>
-    <ul>
-        {% for quiz in quizzes %}
-            <li><a href="{% url 'quiz_detail' quiz.id %}">{{ quiz.title }}</a></li>
-        {% endfor %}
-    </ul>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-8 offset-md-0"> <!-- No offset to align left -->
+                <h1 class="display-4">Quizzes</h1>
+                <ul class="list-group">
+                    {% for quiz in quizzes %}
+                        <li class="list-group-item">
+                            <a href="{% url 'quiz_detail' quiz.id %}">{{ quiz.title }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    <script src="{% static 'jquery/dist/jquery.min.js' %}"></script>
+    <script src="{% static '@popperjs/core/dist/umd/popper.min.js' %}"></script>
+    <script src="{% static 'bootstrap/dist/js/bootstrap.min.js' %}"></script>
 </body>
 </html>
+

@@ -1,10 +1,23 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html>
 <head>
     <title>{{ quiz.title }} - Results</title>
+    <link href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet">
 </head>
 <body>
-    <h1>{{ quiz.title }} - Results</h1>
-    <p>Your score: {{ score }} out of {{ total }}</p>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-8 offset-md-0"> <!-- No offset to align left -->
+                <h1 class="display-4">{{ quiz.title }} - Results</h1>
+                <p class="lead">Your score: <strong>{{ score }}</strong> out of <strong>{{ total }}</strong></p>
+                <a href="{% url 'home' %}" class="btn btn-primary">Back to Quizzes</a>
+            </div>
+        </div>
+    </div>
+    <script src="{% static 'jquery/dist/jquery.min.js' %}"></script>
+    <script src="{% static '@popperjs/core/dist/umd/popper.min.js' %}"></script>
+    <script src="{% static 'bootstrap/dist/js/bootstrap.min.js' %}"></script>
 </body>
 </html>

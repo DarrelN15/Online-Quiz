@@ -1,25 +1,42 @@
+{% load static %}
+{% load custom_filters %}
+
 <!DOCTYPE html>
 <html>
 <head>
     <title>{{ quiz.title }}</title>
+    <link href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet">
 </head>
 <body>
-    <h1>{{ quiz.title }}</h1>
-    <form method="post">
-        {% csrf_token %}
-        <ul>
-            {% for question in questions %}
-                <li>{{ question.text }}
-                    <ul>
-                        <li><input type="radio" name="{{ question.id }}" value="A"> {{ question.option_a }}</li>
-                        <li><input type="radio" name="{{ question.id }}" value="B"> {{ question.option_b }}</li>
-                        <li><input type="radio" name="{{ question.id }}" value="C"> {{ question.option_c }}</li>
-                        <li><input type="radio" name="{{ question.id }}" value="D"> {{ question.option_d }}</li>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-8 offset-md-0"> <!-- No offset to align left -->
+                <h1 class="display-4">{{ quiz.title }}</h1>
+                <form method="post">
+                    {% csrf_token %}
+                    <ul class="list-unstyled">
+                        {% for question in questions %}
+                            <li class="mb-3">{{ question.text }}
+                                <ul class="list-unstyled">
+                                    {% for option in question.options.all %}
+                                        <li>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="{% if question.question_type == 'SC' %}radio{% else %}checkbox{% endif %}" name="{{ question.id }}" value="{{ option.id }}">
+                                                <label class="form-check-label">{{ forloop.counter|num_to_letter }}. {{ option.text }}</label>
+                                            </div>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </li>
+                        {% endfor %}
                     </ul>
-                </li>
-            {% endfor %}
-        </ul>
-        <button type="submit">Submit</button>
-    </form>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="{% static 'jquery/dist/jquery.min.js' %}"></script>
+    <script src="{% static '@popperjs/core/dist/umd/popper.min.js' %}"></script>
+    <script src="{% static 'bootstrap/dist/js/bootstrap.min.js' %}"></script>
 </body>
 </html>
