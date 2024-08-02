@@ -11,10 +11,13 @@
             {% for question in questions %}
                 <li>{{ question.text }}
                     <ul>
-                        <li><input type="radio" name="{{ question.id }}" value="A"> {{ question.option_a }}</li>
-                        <li><input type="radio" name="{{ question.id }}" value="B"> {{ question.option_b }}</li>
-                        <li><input type="radio" name="{{ question.id }}" value="C"> {{ question.option_c }}</li>
-                        <li><input type="radio" name="{{ question.id }}" value="D"> {{ question.option_d }}</li>
+                        {% for option in question.options.all %}
+                            {% if question.question_type == 'SC' %}
+                                <li><input type="radio" name="{{ question.id }}" value="{{ option.id }}"> {{ option.text }}</li>
+                            {% elif question.question_type == 'MC' %}
+                                <li><input type="checkbox" name="{{ question.id }}" value="{{ option.id }}"> {{ option.text }}</li>
+                            {% endif %}
+                        {% endfor %}
                     </ul>
                 </li>
             {% endfor %}
@@ -23,3 +26,4 @@
     </form>
 </body>
 </html>
+
