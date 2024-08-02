@@ -5,22 +5,28 @@
 <html>
 <head>
     <title>{{ quiz.title }}</title>
+    <!-- Loads Bootstrap CSS for styling -->
     <link href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet">
 </head>
 <body>
     <div class="container-fluid">
         <div class="row">
-            <div class="col-md-8 offset-md-0"> <!-- No offset to align left -->
+            <div class="col-md-8 offset-md-0">
+                <!-- Displays the quiz title -->
                 <h1 class="display-4">{{ quiz.title }}</h1>
+                <!-- Form to submit quiz answers -->
                 <form method="post">
                     {% csrf_token %}
                     <ul class="list-unstyled">
+                        <!-- Loops through each question in the quiz -->
                         {% for question in questions %}
                             <li class="mb-3">{{ question.text }}
                                 <ul class="list-unstyled">
-                                    {% for option in question.options.all %}
+                                    <!-- Loops through and displays shuffled options -->
+                                    {% for option in question.shuffled_options %}
                                         <li>
                                             <div class="form-check">
+                                                <!-- Input for single or multiple choice options -->
                                                 <input class="form-check-input" type="{% if question.question_type == 'SC' %}radio{% else %}checkbox{% endif %}" name="{{ question.id }}" value="{{ option.id }}">
                                                 <label class="form-check-label">{{ forloop.counter|num_to_letter }}. {{ option.text }}</label>
                                             </div>
@@ -30,11 +36,13 @@
                             </li>
                         {% endfor %}
                     </ul>
+                    <!-- Submits button for the form -->
                     <button type="submit" class="btn btn-primary">Submit</button>
                 </form>
             </div>
         </div>
     </div>
+    <!-- Loads JavaScript dependencies for Bootstrap -->
     <script src="{% static 'jquery/dist/jquery.min.js' %}"></script>
     <script src="{% static '@popperjs/core/dist/umd/popper.min.js' %}"></script>
     <script src="{% static 'bootstrap/dist/js/bootstrap.min.js' %}"></script>

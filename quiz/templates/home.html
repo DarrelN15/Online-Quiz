@@ -4,16 +4,20 @@
 <html>
 <head>
     <title>Quizzes</title>
+    <!-- Bootstrap CSS for styling -->
     <link href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet">
 </head>
 <body>
     <div class="container-fluid">
         <div class="row">
-            <div class="col-md-8 offset-md-0"> <!-- No offset to align left -->
+            <div class="col-md-8 offset-md-0"> <!-- Aligns content to the left -->
+                <!-- Displays the header for the quizzes list -->
                 <h1 class="display-4">Quizzes</h1>
+                <!-- List of quizzes available -->
                 <ul class="list-group">
                     {% for quiz in quizzes %}
                         <li class="list-group-item">
+                            <!-- Link to quiz details -->
                             <a href="{% url 'quiz_detail' quiz.id %}">{{ quiz.title }}</a>
                         </li>
                     {% endfor %}
@@ -21,9 +25,11 @@
             </div>
         </div>
     </div>
+    <!-- JavaScript dependencies for Bootstrap -->
     <script src="{% static 'jquery/dist/jquery.min.js' %}"></script>
     <script src="{% static '@popperjs/core/dist/umd/popper.min.js' %}"></script>
     <script src="{% static 'bootstrap/dist/js/bootstrap.min.js' %}"></script>
 </body>
 </html>
+
 

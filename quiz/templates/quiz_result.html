@@ -4,18 +4,23 @@
 <html>
 <head>
     <title>{{ quiz.title }} - Results</title>
+    <!-- Bootstrap CSS for styling -->
     <link href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet">
 </head>
 <body>
     <div class="container-fluid">
         <div class="row">
-            <div class="col-md-8 offset-md-0"> <!-- No offset to align left -->
+            <div class="col-md-8 offset-md-0"> <!-- Aligns content to the left -->
+                <!-- Displays the quiz title and results -->
                 <h1 class="display-4">{{ quiz.title }} - Results</h1>
+                <!-- Shows the user's score -->
                 <p class="lead">Your score: <strong>{{ score }}</strong> out of <strong>{{ total }}</strong></p>
+                <!-- Link to go back to the quizzes list -->
                 <a href="{% url 'home' %}" class="btn btn-primary">Back to Quizzes</a>
             </div>
         </div>
     </div>
+    <!-- JavaScript dependencies for Bootstrap -->
     <script src="{% static 'jquery/dist/jquery.min.js' %}"></script>
     <script src="{% static '@popperjs/core/dist/umd/popper.min.js' %}"></script>
     <script src="{% static 'bootstrap/dist/js/bootstrap.min.js' %}"></script>
