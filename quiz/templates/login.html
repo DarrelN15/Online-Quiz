@@ -1,0 +1,27 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+    <!-- Bootstrap CSS -->
+    <link href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet">
+</head>
+<body>
+    <div class="container-fluid mt-5">
+        <h2 class="mb-4">Login</h2>
+        <form method="post" action="{% url 'login' %}?next={{ request.GET.next }}">
+            {% csrf_token %}
+            <div class="mb-3">
+                {{ form.as_p }}
+            </div>
+            <button type="submit" class="btn btn-primary">Login</button>
+        </form>
+        <p class="mt-3">Don't have an account? <a href="{% url 'register' %}">Register</a></p>
+    </div>
+    <!-- Bootstrap JS and dependencies -->
+    <script src="{% static 'jquery/dist/jquery.min.js' %}"></script>
+    <script src="{% static '@popperjs/core/dist/umd/popper.min.js' %}"></script>
+    <script src="{% static 'bootstrap/dist/js/bootstrap.min.js' %}"></script>
+</body>
+</html>
