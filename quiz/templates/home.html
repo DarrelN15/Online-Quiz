@@ -5,21 +5,12 @@
 {% block content %}
 <div class="container-fluid">
     <div class="row">
-        <div class="col-md-8 offset-md-0"> <!-- Aligns content to the left -->
-            <!-- Displays the header for the quizzes list -->
-            <h1 class="display-4">Quizzes</h1>
-            <!-- List of quizzes available -->
-            <ul class="list-group">
-                {% for quiz in quizzes %}
-                    <li class="list-group-item">
-                        <!-- Link to quiz details -->
-                        <a href="{% url 'quiz_detail' quiz.id %}">{{ quiz.title }}</a>
-                    </li>
-                {% endfor %}
-            </ul>
+        <div class="col-md-8 offset-md-0">
+            <h1 class="display-4">Welcome to Our Quiz Platform!</h1>
+            <p class="lead">Test your knowledge with our wide range of quizzes and learn something new today!</p>
+            <a href="{% url 'quizzes' %}" class="btn btn-primary">View Quizzes</a>
         </div>
     </div>
 </div>
 {% endblock %}
-
 
