@@ -1,20 +1,13 @@
 {% load static %}
-
+{% extends 'base.html' %}
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Online Quiz{% endblock %}</title>
-    <!-- Bootstrap CSS -->
+    <title>Admin Results</title>
     <link href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet">
-    <style>
-        body {
-            padding-top: 56px;
-        }
-    </style>
 </head>
-<body>
+
+<body style="margin-top: 75px;">
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
         <div class="container-fluid">
             <a class="navbar-brand" href="{% url 'home' %}">Online Quiz</a>
@@ -35,15 +28,9 @@
                 </ul>
                 <ul class="navbar-nav ms-auto">
                     {% if user.is_authenticated %}
-                        {% if user.is_staff %}
-                            <li class="nav-item">
-                                {% comment %} <a class="nav-link" href="{% url 'admin_results' %}">Admin Results</a> {% endcomment %}
-                                <a href="{% url 'admin_results' %}" class="btn btn-primary">Admin Results</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'admin:index' %}">Admin</a>
-                            </li>
-                        {% endif %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'admin:index' %}">Admin</a>
+                        </li>
                         <li class="nav-item">
                             <form method="post" action="{% url 'logout' %}" class="d-inline">
                                 {% csrf_token %}
@@ -63,20 +50,30 @@
                 </ul>
             </div>
         </div>
-    </nav>     
-    <!-- Main Content -->
+    </nav>   
     <div class="container mt-5">
-        {% block content %}
-        <!-- Page-specific content goes here -->
-        {% endblock %}
+        <h2>Quiz Results</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Quiz</th>
+                    <th>Score</th>
+                    <th>Date Taken</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for attempt in attempts %}
+                <tr>
+                    <td>{{ attempt.user.username }}</td>
+                    <td>{{ attempt.quiz.title }}</td>
+                    <td>{{ attempt.score }}</td>
+                    <td>{{ attempt.date_taken }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
-
-    <!-- Footer -->
-    <footer class="bg-dark text-white mt-5 p-4 text-center">
-        <p>&copy; {{ year }} Online Quiz. All Rights Reserved.</p>
-    </footer>
-
-    <!-- Bootstrap JS and dependencies -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>

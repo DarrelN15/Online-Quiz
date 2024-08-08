@@ -2,10 +2,8 @@
 {% load custom_filters %}
 
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ quiz.title }}</title>
     <link href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet">
 </head>
@@ -57,34 +55,39 @@
         <h2>{{ quiz.title }}</h2>
         
         {% if score is not None %}
-        <div class="quiz-result">
-            <h2>Your Score: {{ score }} out of {{ total }}</h2>
-            <!-- Returns to Homepage Button -->
-            <a href="{% url 'home' %}" onclick="resetQuiz()" class="btn btn-primary mt-3">Return to Homepage</a>
-        </div>
-    {% else %}
-        <form method="POST" id="quiz-form">
-            {% csrf_token %}
-            {% for question in questions %}
-                <div class="mb-4">
-                    <h5>{{ question.text }}</h5>
-                    {% for option in question.shuffled_options %}
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="{{ question.id }}" value="{{ option.id }}">
-                            <label class="form-check-label">{{ option.text }}</label>
-                                </div>
-                    {% endfor %}
-                </div>
-            {% endfor %}
-            <button type="button" onclick="submitQuiz()" class="btn btn-primary">Submit Quiz</button>
-        </form>
-    {% endif %}
-    <!-- JavaScript -->
+            <div class="quiz-result">
+                <h2>Your Score: {{ score }} out of {{ total }}</h2>
+                <!-- Return to Homepage Button -->
+                <a href="{% url 'home' %}" onclick="resetQuiz()" class="btn btn-primary mt-3">Return to Homepage</a>
+            </div>
+        {% else %}
+            <form id="quiz-form" method="POST">
+                {% csrf_token %}
+                {% for question in questions %}
+                    <div class="mb-4">
+                        <h5>{{ question.text }}</h5>
+                        {% for option in question.shuffled_options %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="{{ question.id }}" value="{{ option.id }}">
+                                <label class="form-check-label">{{ option.text }}</label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+                <button type="submit" class="btn btn-primary">Submit Quiz</button>
+            </form>
+        {% endif %}
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>
+
+    <!-- JavaScript for handling local storage and warnings -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const savedAnswers = JSON.parse(localStorage.getItem('quizAnswers')) || {};
             let isFormChanged = false;
-            
+    
             for (const questionId in savedAnswers) {
                 const options = document.getElementsByName(questionId);
                 options.forEach(option => {
@@ -108,29 +111,27 @@
                 });
             });
     
-            document.getElementById('quiz-form').addEventListener('submit', function(event) {
-                event.preventDefault(); // Prevents the default form submission behavior
-                submitQuiz(); // Function that handles the actual submission logic
-            });
+            const form = document.getElementById('quiz-form');
+            if (form) {
+                form.addEventListener('submit', function(event) {
+                    isFormChanged = false; // Clear the change flag to prevent warning
+                    window.removeEventListener('beforeunload', handleBeforeUnload); // Remove the beforeunload listener
+                });
+            }
     
-            window.addEventListener('beforeunload', function(e) {
+            function handleBeforeUnload(e) {
                 if (isFormChanged) {
                     const confirmationMessage = 'You have unsaved changes. Are you sure you want to leave?';
                     e.returnValue = confirmationMessage;
                     return confirmationMessage;
                 }
-            });
+            }
+    
+            window.addEventListener('beforeunload', handleBeforeUnload);
         });
     
         function resetQuiz() {
             localStorage.removeItem('quizAnswers'); 
-            window.location.href = '{% url "home" %}'; // Redirects to the homepage, ensuring a fresh start
-        }
-    
-        function submitQuiz() {
-            // Assume this function handles form data processing
-            localStorage.removeItem('quizAnswers'); // Ensures data is cleared on submission
-            document.getElementById('quiz-form').submit(); // Submits the form data
         }
     </script>
 </body>
