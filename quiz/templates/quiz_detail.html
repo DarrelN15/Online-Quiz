@@ -7,47 +7,93 @@
     <title>{{ quiz.title }}</title>
     <link href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet">
 </head>
-<body>
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-8 offset-md-0">
-                <h1 class="display-4">{{ quiz.title }}</h1>
-                <form method="post">
-                    {% csrf_token %}
-                    <ul class="list-unstyled">
-                        {% for question in questions %}
-                            <li class="mb-3">{{ question.text }}
-                                <ul class="list-unstyled">
-                                    {% for option in question.shuffled_options %}
-                                        <li>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="{% if question.question_type == 'SC' %}radio{% else %}checkbox{% endif %}" name="{{ question.id }}" value="{{ option.id }}">
-                                                <label class="form-check-label">{{ forloop.counter|num_to_letter }}. {{ option.text }}</label>
-                                            </div>
-                                        </li>
-                                    {% endfor %}
-                                </ul>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                </form>
+<body style="margin-top: 75px;">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'home' %}">Online Quiz</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'home' %}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'quizzes' %}">Quizzes</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'about' %}">About</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'admin:index' %}">Admin</a>
+                        </li>
+                        <li class="nav-item">
+                            <form method="post" action="{% url 'logout' %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-link nav-link" style="padding: 0; border: none; background: none;">
+                                    Logout
+                                </button>
+                            </form>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'login' %}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'register' %}">Register</a>
+                        </li>
+                    {% endif %}
+                </ul>
             </div>
         </div>
+    </nav>    
+    <div class="container-fluid mt-5">
+        <h2>{{ quiz.title }}</h2>
+        
+        {% if score is not None %}
+            <div class="quiz-result">
+                <h2>Your Score: {{ score }} out of {{ total }}</h2>
+                <!-- Return to Homepage Button -->
+                <a href="{% url 'home' %}" onclick="resetQuiz()" class="btn btn-primary mt-3">Return to Homepage</a>
+            </div>
+        {% else %}
+            <form id="quiz-form" method="POST">
+                {% csrf_token %}
+                {% for question in questions %}
+                    <div class="mb-4">
+                        <h5>{{ question.text }}</h5>
+                        {% for option in question.shuffled_options %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="{{ question.id }}" value="{{ option.id }}">
+                                <label class="form-check-label">{{ option.text }}</label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+                <button type="submit" class="btn btn-primary">Submit Quiz</button>
+            </form>
+        {% endif %}
     </div>
-    <script src="{% static 'jquery/dist/jquery.min.js' %}"></script>
-    <script src="{% static '@popperjs/core/dist/umd/popper.min.js' %}"></script>
-    <script src="{% static 'bootstrap/dist/js/bootstrap.min.js' %}"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>
 
     <!-- JavaScript for handling local storage and warnings -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const savedAnswers = JSON.parse(localStorage.getItem('quizAnswers')) || {};
+            let isFormChanged = false;
+    
             for (const questionId in savedAnswers) {
                 const options = document.getElementsByName(questionId);
                 options.forEach(option => {
-                    if (savedAnswers[questionId].includes(option.value)) {
+                    if (savedAnswers[questionId] && savedAnswers[questionId].includes(option.value)) {
                         option.checked = true;
+                        isFormChanged = true;
                     }
                 });
             }
@@ -55,6 +101,7 @@
             const inputs = document.querySelectorAll('input[type="radio"], input[type="checkbox"]');
             inputs.forEach(input => {
                 input.addEventListener('change', function() {
+                    isFormChanged = true;
                     const questionId = this.name;
                     const selectedOptions = [...document.getElementsByName(questionId)]
                         .filter(opt => opt.checked)
@@ -63,20 +110,29 @@
                     localStorage.setItem('quizAnswers', JSON.stringify(savedAnswers));
                 });
             });
-        });
     
-        window.addEventListener('beforeunload', function (e) {
-            if (Object.keys(JSON.parse(localStorage.getItem('quizAnswers'))).length > 0) {
-                const confirmationMessage = 'You have unsaved changes. Are you sure you want to leave?';
-                e.returnValue = confirmationMessage;  // Most browsers will show a default message
-                return confirmationMessage;  // Some older browsers require this return value
+            const form = document.getElementById('quiz-form');
+            if (form) {
+                form.addEventListener('submit', function(event) {
+                    isFormChanged = false; // Clear the change flag to prevent warning
+                    window.removeEventListener('beforeunload', handleBeforeUnload); // Remove the beforeunload listener
+                });
             }
+    
+            function handleBeforeUnload(e) {
+                if (isFormChanged) {
+                    const confirmationMessage = 'You have unsaved changes. Are you sure you want to leave?';
+                    e.returnValue = confirmationMessage;
+                    return confirmationMessage;
+                }
+            }
+    
+            window.addEventListener('beforeunload', handleBeforeUnload);
         });
     
-        document.querySelector('form').addEventListener('submit', function() {
-            localStorage.removeItem('quizAnswers'); // Clear stored answers after submission
-        });
+        function resetQuiz() {
+            localStorage.removeItem('quizAnswers'); 
+        }
     </script>
-    
 </body>
 </html>
