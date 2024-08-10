@@ -45,7 +45,7 @@ class QuizAttempt(models.Model):
 class QuestionResponse(models.Model):
     attempt = models.ForeignKey(QuizAttempt, related_name='responses', on_delete=models.CASCADE)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    selected_options = models.ManyToManyField(Option, blank=True)
+    selected_options = models.ManyToManyField(Option)
     is_correct = models.BooleanField(default=False)
 
     def __str__(self):

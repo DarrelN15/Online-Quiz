@@ -65,7 +65,7 @@ def submit_quiz(request, quiz_id):
     total_questions = questions.count()
     
     # Create QuizAttempt instance
-    attempt = QuizAttempt.objects.create(user=request.user, quiz=quiz, total_questions=total_questions)
+    attempt = QuizAttempt.objects.create(user=request.user, quiz=quiz, score=0)
 
     for question in questions:
         selected_option_ids = request.POST.getlist(str(question.id))
