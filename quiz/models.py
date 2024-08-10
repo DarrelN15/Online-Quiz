@@ -4,29 +4,31 @@ from django.contrib.auth.models import User
 class Quiz(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
-    # created_at = models.DateTimeField(auto_now_add=True)
-    # updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.title
 
-class Question(models.Model):
-    title = models.CharField(max_length=255, default="Default Question Title")
-    quiz = models.ForeignKey(Quiz, related_name='questions', on_delete=models.CASCADE)
+class Option(models.Model):
     text = models.CharField(max_length=200)
-    QUESTION_TYPES = (
-        ('SC', 'Single Choice'),
-        ('MC', 'Multiple Choice'),
-    )
-    question_type = models.CharField(max_length=2, choices=QUESTION_TYPES, default='SC')
+    is_correct = models.BooleanField(default=False)
 
     def __str__(self):
         return self.text
 
-class Option(models.Model):
-    question = models.ForeignKey(Question, related_name='options', on_delete=models.CASCADE, null=True, blank=True)
-    text = models.CharField(max_length=200)
-    is_correct = models.BooleanField(default=False)
+class Question(models.Model):
+    SINGLE_CHOICE = 'SC'
+    MULTIPLE_CHOICE = 'MC'
+    QUESTION_TYPES = [
+        (SINGLE_CHOICE, 'Single Choice'),
+        (MULTIPLE_CHOICE, 'Multiple Choice'),
+    ]
+
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='questions')
+    text = models.CharField(max_length=255)
+    options = models.ManyToManyField(Option, related_name='questions')
+    correct_options = models.ManyToManyField(Option, related_name='correct_for')
+    question_type = models.CharField(max_length=2, choices=QUESTION_TYPES, default=SINGLE_CHOICE)
+    title = models.CharField(max_length=255, default="")
 
     def __str__(self):
         return self.text
