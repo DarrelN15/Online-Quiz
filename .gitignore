@@ -1,0 +1,35 @@
+# Virtual environment
+.venv/
+env/
+venv/
+
+# Python cache files
+*.pyc
+__pycache__/
+
+# Environment variables
+.env
+
+# macOS specific files
+.DS_Store
+
+# Local SQLite database (if not using in production)
+db.sqlite3
+
+# Node modules
+node_modules/
+
+# Editor/IDE specific files
+.vscode/
+.idea/
+.project
+.settings/
+.classpath
+
+# Log and temp files
+*.log
+*.tmp
+*.bak
+
+# history files
+.history/
