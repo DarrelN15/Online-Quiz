@@ -18,6 +18,8 @@ from django.contrib import admin
 from django.urls import path, include
 
 urlpatterns = [
+    path('admin/results/', include('quiz.urls')),  # Make sure this is before the admin pattern
     path('admin/', admin.site.urls),
+    path('accounts/', include('django.contrib.auth.urls')),
     path('', include('quiz.urls')),
 ]
