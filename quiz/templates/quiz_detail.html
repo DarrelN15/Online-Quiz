@@ -6,6 +6,11 @@
 <head>
     <title>{{ quiz.title }}</title>
     <link href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet">
+    <style>
+        .quiz-content {
+            user-select: none;
+        }
+    </style>
 </head>
 <body style="margin-top: 75px;">
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
@@ -51,7 +56,7 @@
             </div>
         </div>
     </nav>    
-    <div class="container-fluid mt-5">
+    <div class="container-fluid mt-5 quiz-content">
         <h2>{{ quiz.title }}</h2>
         
         {% if score is not None %}
@@ -133,6 +138,14 @@
         function resetQuiz() {
             localStorage.removeItem('quizAnswers'); 
         }
+
+        // Prevent copying, right-click, and certain key presses
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        document.addEventListener('keydown', function (event) {
+            if ((event.ctrlKey && event.key === 's') || (event.ctrlKey && event.key === 'c')) {
+                event.preventDefault();
+            }
+        });
     </script>
 </body>
 </html>
