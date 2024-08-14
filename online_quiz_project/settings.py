@@ -77,7 +77,7 @@ WSGI_APPLICATION = 'online_quiz_project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'your_database_name',
+        'NAME': 'online_quiz_db',
         'USER': 'postgres',
         'PASSWORD': 'burundi15',
         'HOST': 'localhost',  # or your PostgreSQL server's address
@@ -145,7 +145,35 @@ LOGGING = {
             'handlers': ['console'],
             'level': 'INFO',
         },
+         'quiz': {  
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
     },
 }
+
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': False,
+#     'handlers': {
+#         'console': {
+#             'level': 'DEBUG',
+#             'class': 'logging.StreamHandler',
+#         },
+#     },
+#     'loggers': {
+#         'django': {
+#             'handlers': ['console'],
+#             'level': 'DEBUG',
+#             'propagate': True,
+#         },
+#         'quiz': {  # Replace with your app's name
+#             'handlers': ['console'],
+#             'level': 'DEBUG',
+#             'propagate': False,
+#         },
+#     },
+# }
 
 LOGIN_REDIRECT_URL = '/'

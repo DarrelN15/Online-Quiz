@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Quiz Results{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Quiz Results</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Quiz</th>
+                <th>Score</th>
+                <th>Date Taken</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for attempt in attempts %}
+            <tr>
+                <td>{{ attempt.user.username }}</td>
+                <td>{{ attempt.quiz.title }}</td>
+                <td>{{ attempt.score }}</td>
+                <td>{{ attempt.date_taken }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4">No quiz attempts found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>
+{% endblock %}

@@ -37,20 +37,15 @@
                     {% if user.is_authenticated %}
                         {% if user.is_staff %}
                             <li class="nav-item">
-                                {% comment %} <a class="nav-link" href="{% url 'admin_results' %}">Admin Results</a> {% endcomment %}
-                                <a href="{% url 'admin_results' %}" class="btn btn-primary">Admin Results</a>
+                                <a class="nav-link" href="{% url 'quiz_results' %}">Quiz Results</a>
+                                {% comment %} <a href="{% url 'quiz_results' %}" class="btn btn-primary">Quiz Results</a> {% endcomment %}
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'admin:index' %}">Admin</a>
                             </li>
                         {% endif %}
                         <li class="nav-item">
-                            <form method="post" action="{% url 'logout' %}" class="d-inline">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-link nav-link" style="padding: 0; border: none; background: none;">
-                                    Logout
-                                </button>
-                            </form>
+                            <a class="nav-link" href="{% url 'logout' %}">Logout</a>
                         </li>
                     {% else %}
                         <li class="nav-item">
