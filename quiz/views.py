@@ -1,6 +1,7 @@
 from django.http import HttpResponse
 import random
 from django.shortcuts import render, get_object_or_404
+from django.urls import reverse
 from .models import Quiz, Question, Option, QuizAttempt, QuestionResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
@@ -62,11 +63,9 @@ def quiz_detail(request, quiz_id):
     return render(request, 'quiz_detail.html', {'quiz': quiz, 'questions': questions, 'score': score, 'total': total})
 
 
-
 @login_required
 def submit_quiz(request, quiz_id):
     logger.debug(f"Submit Quiz view called for quiz_id: {quiz_id}")
-    # logger.info(f"Submit quiz view called for quiz_id: {quiz_id} by user: {request.user}")
 
     if request.method == 'POST':
         quiz = get_object_or_404(Quiz, id=quiz_id)
@@ -90,7 +89,6 @@ def submit_quiz(request, quiz_id):
             if is_correct:
                 score += 1
             
-            # Log each question's response
             logger.debug(f"Question {question.id} answered. Correct: {is_correct}, Selected options: {[option.id for option in selected_options]}")
 
             try:
@@ -110,10 +108,14 @@ def submit_quiz(request, quiz_id):
         except Exception as e:
             logger.error(f"Error updating QuizAttempt with final score: {e}")
 
-        return render(request, 'quiz_results.html', {'quiz': quiz, 'score': score, 'total': total_questions})
-    
-    # If it's not a POST request, redirect to the quiz detail page
-    logger.warning(f"Non-POST request received for submit_quiz view for quiz_id: {quiz_id}")
+        # Render the results on the same page
+        return render(request, 'quiz_detail.html', {
+            'quiz': quiz,
+            'score': score,
+            'total': total_questions,
+            'questions': questions
+        })
+
     return redirect('quiz_detail', quiz_id=quiz_id)
 
 
@@ -134,11 +136,48 @@ def login_success_view(request):
 
 @staff_member_required
 def quiz_results_view(request):
-    logger.debug(f"Quiz results view called")
+    logger.debug("Quiz results view called")
     if not request.user.is_staff:
         return redirect('home')
+    
     attempts = QuizAttempt.objects.all().order_by('-date_taken')
-    return render(request, 'quiz_results.html', {'attempts': attempts})
+    logger.debug(f"Found {attempts.count()} quiz attempts.")
+    
+    paginator = Paginator(attempts, 10)  # Show 10 attempts per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    # Debugging URL generation
+    for attempt in page_obj:
+        print(reverse('quiz_attempt_detail', args=[attempt.id]))
+    
+    return render(request, 'quiz_results.html', {'page_obj': page_obj})
+
+@login_required
+def quiz_attempt_detail(request, attempt_id):
+    attempt = get_object_or_404(QuizAttempt, id=attempt_id)
+    questions = attempt.quiz.questions.all()
+
+    # Prepare a list of dictionaries to pass to the template
+    question_data = []
+    for question in questions:
+        # Assuming questionresponse_set exists and is accessible
+        question_response = QuestionResponse.objects.get(attempt=attempt, question=question)
+        selected_options = question_response.selected_options.all()
+        question_data.append({
+            'question': question,
+            'correct_options': question.correct_options.all(),
+            'selected_options': selected_options,
+        })
+
+    context = {
+        'attempt': attempt,
+        'question_data': question_data,
+    }
+    return render(request, 'quiz_attempt_detail.html', context)
+
+
+
 
 def logout_view(request):
     logger.debug(f"Logout view called")

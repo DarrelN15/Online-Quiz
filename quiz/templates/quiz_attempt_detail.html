@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Quiz Attempt Details{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Quiz Attempt Details</h2>
+    <p><strong>User:</strong> {{ attempt.user.username }}</p>
+    <p><strong>Quiz:</strong> {{ attempt.quiz.title }}</p>
+    <p><strong>Date Taken:</strong> {{ attempt.date_taken }}</p>
+    <p><strong>Score:</strong> {{ attempt.score }}</p>
+
+    <hr>
+
+    {% for item in question_data %}
+    <div class="question-detail mb-4">
+        <h4>{{ item.question.text }}</h4>
+        <p><strong>Correct Answers:</strong></p>
+        <ul>
+            {% for option in item.correct_options %}
+            <li>{{ option.text }}</li>
+            {% endfor %}
+        </ul>
+
+        <p><strong>User's Selected Answers:</strong></p>
+        <ul>
+            {% for option in item.selected_options %}
+            <li class="{% if option in item.correct_options %}text-success{% else %}text-danger{% endif %}">
+                {{ option.text }}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

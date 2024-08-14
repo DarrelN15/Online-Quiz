@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
+
 
 class Quiz(models.Model):
     title = models.CharField(max_length=200)
@@ -38,15 +40,16 @@ class QuizAttempt(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
     score = models.IntegerField()
     date_taken = models.DateTimeField(auto_now_add=True)
+    # date_taken = timezone.now()
 
     def __str__(self):
         return f'{self.user.username} - {self.quiz.title} - Score: {self.score}'
 
 class QuestionResponse(models.Model):
-    attempt = models.ForeignKey(QuizAttempt, related_name='responses', on_delete=models.CASCADE)
+    attempt = models.ForeignKey(QuizAttempt, on_delete=models.CASCADE)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    is_correct = models.BooleanField()
     selected_options = models.ManyToManyField(Option)
-    is_correct = models.BooleanField(default=False)
 
     def __str__(self):
         return f'{self.question.text} - {self.is_correct}'

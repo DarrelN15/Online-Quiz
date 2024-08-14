@@ -37,12 +37,7 @@
                             <a class="nav-link" href="{% url 'admin:index' %}">Admin</a>
                         </li>
                         <li class="nav-item">
-                            <form method="post" action="{% url 'logout' %}" class="d-inline">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-link nav-link" style="padding: 0; border: none; background: none;">
-                                    Logout
-                                </button>
-                            </form>
+                            <a class="nav-link" href="{% url 'logout' %}">Logout</a>
                         </li>
                     {% else %}
                         <li class="nav-item">
