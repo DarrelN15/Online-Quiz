@@ -7,7 +7,7 @@
     <p><strong>User:</strong> {{ attempt.user.username }}</p>
     <p><strong>Quiz:</strong> {{ attempt.quiz.title }}</p>
     <p><strong>Date Taken:</strong> {{ attempt.date_taken }}</p>
-    <p><strong>Score:</strong> {{ attempt.score }}</p>
+    <p><strong>Score:</strong> {{ correct_answers }} out of {{ total_questions }} ({{ percentage_score }}%)</p>
 
     <hr>
 

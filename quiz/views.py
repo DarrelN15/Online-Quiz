@@ -9,6 +9,9 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import logout
 from django.shortcuts import redirect
 from django.core.paginator import Paginator
+from django.contrib.auth.models import User
+from django.db.models import Q
+from django.utils.dateparse import parse_date
 import logging
 
 logger = logging.getLogger(__name__)
@@ -134,24 +137,105 @@ def login_success_view(request):
     logger.debug(f"Login view called")
     return redirect('home')
 
+from django.db.models import Q
+
 @staff_member_required
 def quiz_results_view(request):
     logger.debug("Quiz results view called")
     if not request.user.is_staff:
         return redirect('home')
     
-    attempts = QuizAttempt.objects.all().order_by('-date_taken')
-    logger.debug(f"Found {attempts.count()} quiz attempts.")
+    # Get filters from the request
+    user_filter = request.GET.get('user')
+    date_from = request.GET.get('date_from')
+    date_to = request.GET.get('date_to')
+    score_min = request.GET.get('score_min')
+    score_max = request.GET.get('score_max')
+    quiz_filter = request.GET.get('quiz')
+    sort_by = request.GET.get('sort_by', 'date_taken')
+
+    # Initial filter based on specific fields
+    attempts = QuizAttempt.objects.all()
+
+    if user_filter:
+        attempts = attempts.filter(user__username__icontains=user_filter)
     
-    paginator = Paginator(attempts, 10)  # Show 10 attempts per page
+    if quiz_filter:
+        attempts = attempts.filter(quiz__title__icontains=quiz_filter)
+    
+    if date_from:
+        attempts = attempts.filter(date_taken__gte=parse_date(date_from))
+    
+    if date_to:
+        attempts = attempts.filter(date_taken__lte=parse_date(date_to))
+    
+    if score_min:
+        attempts = attempts.filter(score__gte=int(score_min))
+    
+    if score_max:
+        attempts = attempts.filter(score__lte=int(score_max))
+    
+    # Implement the search functionality here
+    search_query = request.GET.get('search')
+    if search_query:
+        attempts = attempts.filter(
+            Q(user__username__icontains=search_query) |
+            Q(quiz__title__icontains=search_query) |
+            Q(date_taken__icontains=search_query)
+        )
+
+    logger.debug(f"Found {attempts.count()} quiz attempts after filtering.")
+    
+    # Process attempts for percentage and sorting
+    attempt_data = []
+    for attempt in attempts:
+        total_questions = attempt.quiz.questions.count()
+        correct_answers = attempt.score
+        percentage_score = (correct_answers / total_questions) * 100 if total_questions > 0 else 0
+        
+        # Determine badge color based on percentage score
+        if percentage_score >= 80:
+            badge_color = "bg-success"
+        elif 50 <= percentage_score < 80:
+            badge_color = "bg-warning"
+        else:
+            badge_color = "bg-danger"
+        
+        attempt_data.append({
+            'attempt': attempt,
+            'total_questions': total_questions,
+            'percentage_score': percentage_score,
+            'badge_color': badge_color,
+        })
+        
+    # Sort the attempt data based on the selected sorting option
+    if sort_by == 'percentage':
+        attempt_data.sort(key=lambda x: x['percentage_score'], reverse=True)
+    elif sort_by == 'score':
+        attempt_data.sort(key=lambda x: x['attempt'].score, reverse=True)
+    elif sort_by == 'user':
+        attempt_data.sort(key=lambda x: x['attempt'].user.username.lower())
+    elif sort_by == 'quiz_title':
+        attempt_data.sort(key=lambda x: x['attempt'].quiz.title.lower())
+    else:  # default sorting by date_taken
+        attempt_data.sort(key=lambda x: x['attempt'].date_taken, reverse=True)
+    
+    paginator = Paginator(attempt_data, 10)  # Show 10 attempts per page
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
-    # Debugging URL generation
-    for attempt in page_obj:
-        print(reverse('quiz_attempt_detail', args=[attempt.id]))
-    
-    return render(request, 'quiz_results.html', {'page_obj': page_obj})
+    return render(request, 'quiz_results.html', {
+        'page_obj': page_obj,
+        'sort_by': sort_by,
+        'user_filter': user_filter,
+        'date_from': date_from,
+        'date_to': date_to,
+        'score_min': score_min,
+        'score_max': score_max,
+        'quiz_filter': quiz_filter,
+        'search_query': search_query,  # Pass the search query back to the template
+    })
+
 
 @login_required
 def quiz_attempt_detail(request, attempt_id):
@@ -160,19 +244,32 @@ def quiz_attempt_detail(request, attempt_id):
 
     # Prepare a list of dictionaries to pass to the template
     question_data = []
+    total_questions = questions.count()
+    correct_answers = 0
+
     for question in questions:
-        # Assuming questionresponse_set exists and is accessible
         question_response = QuestionResponse.objects.get(attempt=attempt, question=question)
         selected_options = question_response.selected_options.all()
+        is_correct = set(selected_options) == set(question.correct_options.all())
+        
+        if is_correct:
+            correct_answers += 1
+        
         question_data.append({
             'question': question,
             'correct_options': question.correct_options.all(),
             'selected_options': selected_options,
         })
 
+    # Calculate percentage score
+    percentage_score = (correct_answers / total_questions) * 100 if total_questions > 0 else 0
+
     context = {
         'attempt': attempt,
         'question_data': question_data,
+        'total_questions': total_questions,
+        'correct_answers': correct_answers,
+        'percentage_score': percentage_score,
     }
     return render(request, 'quiz_attempt_detail.html', context)
 
