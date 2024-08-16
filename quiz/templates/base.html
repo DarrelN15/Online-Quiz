@@ -38,12 +38,14 @@
                         {% if user.is_staff %}
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'quiz_results' %}">Quiz Results</a>
-                                {% comment %} <a href="{% url 'quiz_results' %}" class="btn btn-primary">Quiz Results</a> {% endcomment %}
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'admin:index' %}">Admin</a>
                             </li>
                         {% endif %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'profile' %}">Profile</a>
+                        </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'logout' %}">Logout</a>
                         </li>
@@ -55,7 +57,7 @@
                             <a class="nav-link" href="{% url 'register' %}">Register</a>
                         </li>
                     {% endif %}
-                </ul>
+                </ul>                
             </div>
         </div>
     </nav>     

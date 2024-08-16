@@ -9,6 +9,12 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import logout
 from django.shortcuts import redirect
 from django.core.paginator import Paginator
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
+from django.contrib import messages
+from .forms import EditProfileForm, CustomPasswordChangeForm
 from django.contrib.auth.models import User
 from django.db.models import Q
 from django.utils.dateparse import parse_date
@@ -273,10 +279,45 @@ def quiz_attempt_detail(request, attempt_id):
     }
     return render(request, 'quiz_attempt_detail.html', context)
 
-
-
-
 def logout_view(request):
     logger.debug(f"Logout view called")
     logout(request)
     return redirect('home')
+
+# @login_required
+# def profile_view(request):
+#     is_admin = request.user.is_staff
+#     password_form = PasswordChangeForm(request.user)
+#     return render(request, 'profile.html', {'password_form': password_form})
+
+@login_required
+def profile_view(request):
+    is_admin = request.user.is_staff  # Check if the user is an admin
+    return render(request, 'profile.html', {'is_admin': is_admin})
+
+@login_required
+def edit_profile(request):
+    if request.method == 'POST':
+        form = EditProfileForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your profile has been updated!')
+            return redirect('edit_profile')
+    else:
+        form = EditProfileForm(instance=request.user)
+    return render(request, 'edit_profile.html', {'form': form})
+
+@login_required
+def change_password(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)  # Important, to keep the user logged in
+            messages.success(request, 'Your password was successfully updated!')
+            return redirect('edit_profile')
+        else:
+            messages.error(request, 'Please correct the error below.')
+    else:
+        form = PasswordChangeForm(request.user)
+    return render(request, 'change_password.html', {'form': form})

@@ -1,0 +1,24 @@
+
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}User Profile{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>User Profile</h2>
+    
+    <p><strong>Username:</strong> {{ user.username }}</p>
+    <p><strong>Email:</strong> {{ user.email }}</p>
+    <p><strong>Date Joined:</strong> {{ user.date_joined }}</p>
+    
+    {% if is_admin %}
+    <p><strong>Status:</strong> Admin Account </p>
+    {% endif %}
+    
+    <a href="{% url 'edit_profile' %}" class="btn btn-primary">Edit Profile</a>
+    <button type="button" class="btn btn-primary" onclick="window.location.href='{% url 'change_password' %}'">Change Password</button>
+
+</div>
+{% endblock %}
