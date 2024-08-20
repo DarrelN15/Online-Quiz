@@ -54,6 +54,8 @@
     <div class="container-fluid mt-5 quiz-content">
         <h2>{{ quiz.title }}</h2>
         
+        <p>{{ quiz.description }}</p>
+
         {% if score is not None %}
             <div class="quiz-result">
                 <h2>Your Score: {{ score }} out of {{ total }}</h2>
