@@ -26,11 +26,10 @@ def test_logging(request):
     logger.debug("Test logging view called")
     return HttpResponse("Logging test successful")
 
-#1 Creating homepage 
 def home(request):
     return render(request, 'home.html')
 
-#2 Creating quiz view
+@login_required
 def quizzes_view(request):
     logger.debug("Quiz view called")
     quizzes_list = Quiz.objects.all().order_by('id')
@@ -39,42 +38,147 @@ def quizzes_view(request):
     page_obj = paginator.get_page(page_number)
     return render(request, 'quizzes.html', {'quizzes': page_obj})
 
-
-
 def about(request):
     logger.debug(f"About view called")
     return render(request, 'about.html')
 
+# @login_required
+# def quiz_detail(request, quiz_id):
+#     logger.debug(f"Quiz Detail view called")
+#     quiz = get_object_or_404(Quiz, id=quiz_id)
+#     questions = quiz.questions.all()
+
+#     for question in questions:
+#         options = list(question.options.all())
+#         random.shuffle(options)
+#         question.shuffled_options = options
+
+#     score = None
+#     total = len(questions)
+
+#     if request.method == 'POST':
+#         score = 0
+#         for question in questions:
+#             selected_option_ids = request.POST.getlist(str(question.id))
+#             selected_options = Option.objects.filter(id__in=selected_option_ids)
+#             correct_options = question.correct_options.all()
+#             if set(selected_options) == set(correct_options):
+#                 score += 1
+
+#         return render(request, 'quiz_detail.html', {'quiz': quiz, 'questions': questions, 'score': score, 'total': total})
+
+#     return render(request, 'quiz_detail.html', {'quiz': quiz, 'questions': questions, 'score': score, 'total': total})
+
+@login_required
 def quiz_detail(request, quiz_id):
-    logger.debug(f"Quiz Detail view called")
+    logger.debug("Quiz Detail view called")
     quiz = get_object_or_404(Quiz, id=quiz_id)
     questions = quiz.questions.all()
 
-    for question in questions:
-        options = list(question.options.all())
-        random.shuffle(options)
-        question.shuffled_options = options
-
-    score = None
-    total = len(questions)
-
-    if request.method == 'POST':
-        score = 0
+    # Check if the user has already completed this quiz
+    try:
+        quiz_attempt = QuizAttempt.objects.get(user=request.user, quiz=quiz, is_completed=True)
+        # If a completed attempt exists, show the result page
+        score = quiz_attempt.score
+        return render(request, 'quiz_result.html', {'quiz': quiz, 'score': score, 'total': len(questions)})
+    except QuizAttempt.DoesNotExist:
+        # If no completed attempt exists, allow the user to take the quiz
         for question in questions:
-            selected_option_ids = request.POST.getlist(str(question.id))
-            selected_options = Option.objects.filter(id__in=selected_option_ids)
-            correct_options = question.correct_options.all()
-            if set(selected_options) == set(correct_options):
-                score += 1
+            options = list(question.options.all())
+            random.shuffle(options)
+            question.shuffled_options = options
+
+        score = None
+        total = len(questions)
+
+        if request.method == 'POST':
+            score = 0
+            for question in questions:
+                selected_option_ids = request.POST.getlist(str(question.id))
+                selected_options = Option.objects.filter(id__in=selected_option_ids)
+                correct_options = question.correct_options.all()
+                if set(selected_options) == set(correct_options):
+                    score += 1
+
+            # Save the quiz attempt
+            QuizAttempt.objects.create(user=request.user, quiz=quiz, score=score, is_completed=True)
+
+            return render(request, 'quiz_result.html', {'quiz': quiz, 'score': score, 'total': total})
 
         return render(request, 'quiz_detail.html', {'quiz': quiz, 'questions': questions, 'score': score, 'total': total})
 
-    return render(request, 'quiz_detail.html', {'quiz': quiz, 'questions': questions, 'score': score, 'total': total})
 
+# @login_required
+# def submit_quiz(request, quiz_id):
+#     logger.debug(f"Submit Quiz view called for quiz_id: {quiz_id}")
+
+#     if request.method == 'POST':
+#         quiz = get_object_or_404(Quiz, id=quiz_id)
+#         questions = quiz.questions.all()
+#         score = 0
+#         total_questions = questions.count()
+
+#         logger.debug(f"Quiz retrieved: {quiz.title} with {total_questions} questions")
+
+#         try:
+#             attempt = QuizAttempt.objects.create(user=request.user, quiz=quiz, score=0)
+#             logger.info(f"QuizAttempt created for user: {request.user} and quiz: {quiz.title}")
+#         except Exception as e:
+#             logger.error(f"Error creating QuizAttempt for user: {request.user} and quiz: {quiz.title}: {e}")
+#             return render(request, 'error_page.html', {'message': 'Error saving quiz attempt. Please try again.'})
+
+#         for question in questions:
+#             selected_option_ids = request.POST.getlist(str(question.id))
+#             selected_options = Option.objects.filter(id__in=selected_option_ids)
+#             is_correct = set(selected_options) == set(question.correct_options.all())
+#             if is_correct:
+#                 score += 1
+            
+#             logger.debug(f"Question {question.id} answered. Correct: {is_correct}, Selected options: {[option.id for option in selected_options]}")
+
+#             try:
+#                 response = QuestionResponse.objects.create(attempt=attempt, question=question, is_correct=is_correct)
+#                 response.selected_options.set(selected_options)
+#                 logger.info(f"QuestionResponse saved for question: {question.id}, is_correct: {is_correct}")
+#             except Exception as e:
+#                 logger.error(f"Error saving QuestionResponse for question: {question.id} in quiz attempt: {attempt.id}: {e}")
+
+#         logger.info(f'User {request.user} submitted quiz {quiz_id} with score {score} out of {total_questions}')
+
+#         # Update the attempt with the final score
+#         attempt.score = score
+#         try:
+#             attempt.save()
+#             logger.info(f"QuizAttempt updated with final score: {score} for user: {request.user}")
+#         except Exception as e:
+#             logger.error(f"Error updating QuizAttempt with final score: {e}")
+
+#         # Render the results on the same page
+#         return render(request, 'quiz_detail.html', {
+#             'quiz': quiz,
+#             'score': score,
+#             'total': total_questions,
+#             'questions': questions
+#         })
+
+#     return redirect('quiz_detail', quiz_id=quiz_id)
 
 @login_required
 def submit_quiz(request, quiz_id):
     logger.debug(f"Submit Quiz view called for quiz_id: {quiz_id}")
+
+    # Check if the user has already completed this quiz
+    try:
+        attempt = QuizAttempt.objects.get(user=request.user, quiz=quiz_id, is_completed=True)
+        logger.info(f"User {request.user} has already completed quiz {quiz_id}. Redirecting to results.")
+        return render(request, 'quiz_result.html', {
+            'quiz': attempt.quiz,
+            'score': attempt.score,
+            'total': attempt.quiz.questions.count(),
+            'questions': attempt.quiz.questions.all()
+        })
+    except QuizAttempt.DoesNotExist:
+        pass  # User hasn't completed this quiz, allow them to submit
 
     if request.method == 'POST':
         quiz = get_object_or_404(Quiz, id=quiz_id)
@@ -85,7 +189,7 @@ def submit_quiz(request, quiz_id):
         logger.debug(f"Quiz retrieved: {quiz.title} with {total_questions} questions")
 
         try:
-            attempt = QuizAttempt.objects.create(user=request.user, quiz=quiz, score=0)
+            attempt = QuizAttempt.objects.create(user=request.user, quiz=quiz, score=0, is_completed=False)
             logger.info(f"QuizAttempt created for user: {request.user} and quiz: {quiz.title}")
         except Exception as e:
             logger.error(f"Error creating QuizAttempt for user: {request.user} and quiz: {quiz.title}: {e}")
@@ -109,16 +213,17 @@ def submit_quiz(request, quiz_id):
 
         logger.info(f'User {request.user} submitted quiz {quiz_id} with score {score} out of {total_questions}')
 
-        # Update the attempt with the final score
+        # Update the attempt with the final score and mark it as completed
         attempt.score = score
+        attempt.is_completed = True
         try:
             attempt.save()
-            logger.info(f"QuizAttempt updated with final score: {score} for user: {request.user}")
+            logger.info(f"QuizAttempt updated with final score: {score} and marked as completed for user: {request.user}")
         except Exception as e:
             logger.error(f"Error updating QuizAttempt with final score: {e}")
 
         # Render the results on the same page
-        return render(request, 'quiz_detail.html', {
+        return render(request, 'quiz_result.html', {
             'quiz': quiz,
             'score': score,
             'total': total_questions,
@@ -283,12 +388,6 @@ def logout_view(request):
     logger.debug(f"Logout view called")
     logout(request)
     return redirect('home')
-
-# @login_required
-# def profile_view(request):
-#     is_admin = request.user.is_staff
-#     password_form = PasswordChangeForm(request.user)
-#     return render(request, 'profile.html', {'password_form': password_form})
 
 @login_required
 def profile_view(request):

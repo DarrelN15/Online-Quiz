@@ -66,7 +66,7 @@ class UserAuthenticationTest(TestCase):
 
 class UserProfileTest(TestCase):
     def setUp(self):
-        # Create a regular user
+        # Creates a regular user
         self.user = User.objects.create_user(username='testuser', password='testpassword')
 
     def test_profile_view(self):
@@ -78,7 +78,7 @@ class UserProfileTest(TestCase):
 
 class UserProfileEditTest(TestCase):
     def setUp(self):
-        # Create a user for testing profile edit
+        # Creates a user for testing profile edit
         self.user = User.objects.create_user(username='testuser', password='testpassword', email='test@example.com')
 
     def test_profile_edit(self):
@@ -104,64 +104,64 @@ class UserProfileEditTest(TestCase):
 
 class AdminStatusDisplayTest(TestCase):
     def setUp(self):
-        # Create a regular user for testing
+        # Creates a regular user for testing
         self.user = User.objects.create_user(username='regularuser', password='testpassword')
-        # Log in as the regular user
+        # Logs in as the regular user
         self.client.login(username='regularuser', password='testpassword')
 
     def test_regular_user_status_display(self):
-        # Access the profile page as a regular user
+        # Accesses the profile page as a regular user
         response = self.client.get(reverse('profile'))
 
-        # Assert that the user is not redirected (status code should be 200)
+        # Asserts that the user is not redirected (status code should be 200)
         self.assertEqual(response.status_code, 200)
 
-        # Assert that the profile page does not contain the admin status message
+        # Asserts that the profile page does not contain the admin status message
         self.assertNotContains(response, 'This is an admin account')
 
 class PasswordAuthenticationTest(TestCase):
     def setUp(self):
-        # Create a user for testing password change
+        # Creates a user for testing password change
         self.user = User.objects.create_user(username='testuser', password='testpassword')
-        # Log in as the user
+        # Logs in as the user
         self.client.login(username='testuser', password='testpassword')
         
-        # Create a new password
+        # Creates a new password
         self.new_password = 'newpassword123'
         
     def test_password_change(self):
-        # Create a new password change form and submit it
+        # Creates a new password change form and submit it
         response = self.client.post(reverse('change_password'), {
             'old_password': 'testpassword',
             'new_password1': self.new_password,
             'new_password2': self.new_password,
         })
 
-        # Assert that the password was changed and the response is a redirect
+        # Asserts that the password was changed and the response is a redirect
         self.assertEqual(response.status_code, 302)
         
-        # Log out and try to log in with the new password
+        # Logs out and trys to log in with the new password
         self.client.logout()
         login_successful = self.client.login(username='testuser', password=self.new_password)
         
-        # Assert that the login with the new password is successful
+        # Asserts that the login with the new password is successful
         self.assertTrue(login_successful)
 
     def test_password_change_invalid(self):
-        # Attempt to change the password with invalid data (mismatching new passwords)
+        # Attempts to change the password with invalid data (mismatching new passwords)
         response = self.client.post(reverse('change_password'), {
             'old_password': 'testpassword',
             'new_password1': self.new_password,
             'new_password2': 'differentpassword',
         })
 
-        # Assert that the form is not valid and no redirect happens
+        # Asserts that the form is not valid and no redirect happens
         self.assertEqual(response.status_code, 200)  # No redirect because the form should be invalid
         self.assertContains(response, "The two password fields didn’t match.")
         
 class QuizCreationTest(TestCase):
     def setUp(self):
-        # Create an admin user
+        # Creates an admin user
         self.admin_user = User.objects.create_superuser(username='adminuser', password='adminpassword')
         self.client.login(username='adminuser', password='adminpassword')
 
@@ -175,7 +175,7 @@ class QuizCreationTest(TestCase):
         
 class QuizListingTest(TestCase):
     def setUp(self):
-        # Create some quizzes
+        # Creates some quizzes
         Quiz.objects.create(title='Quiz 1', description='Description 1')
         Quiz.objects.create(title='Quiz 2', description='Description 2')
 
@@ -197,19 +197,19 @@ class QuizDetailViewTest(TestCase):
 
 class QuizSubmissionTest(TestCase):
     def setUp(self):
-        # Create a quiz
+        # Creates a quiz
         self.quiz = Quiz.objects.create(title='Quiz Submission Test')
         
-        # Create a question
+        # Creates a question
         self.question = Question.objects.create(quiz=self.quiz, text='Sample Question', question_type=Question.SINGLE_CHOICE)
         
-        # Create options and link them to the question
+        # Creates options and link them to the question
         self.option1 = Option.objects.create(text='Option 1', is_correct=True)
         self.option2 = Option.objects.create(text='Option 2', is_correct=False)
         self.question.options.add(self.option1, self.option2)
         self.question.correct_options.add(self.option1)
         
-        # Create a user
+        # Creates a user
         self.user = User.objects.create_user(username='testuser', password='testpassword')
         self.client.login(username='testuser', password='testpassword')
 
@@ -218,10 +218,10 @@ class QuizSubmissionTest(TestCase):
             str(self.question.id): self.option1.id,
         })
 
-        self.assertEqual(response.status_code, 200)  # Expect the quiz detail page to be rendered
-        self.assertContains(response, 'Your Score: 1 out of 1')  # Check if the score is displayed correctly
+        self.assertEqual(response.status_code, 200)  # Expects the quiz detail page to be rendered
+        self.assertContains(response, 'Your Score: 1 out of 1')  # Checks if the score is displayed correctly
 
-        # Verify that the QuizAttempt was saved with the correct score
+        # Verifys that the QuizAttempt was saved with the correct score
         attempt = QuizAttempt.objects.get(user=self.user, quiz=self.quiz)
         self.assertEqual(attempt.score, 1)
 

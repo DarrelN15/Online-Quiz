@@ -8,9 +8,14 @@
         <div class="col-md-8 offset-md-0">
             <h1 class="display-4">Welcome to Our Quiz Platform!</h1>
             <p class="lead">Test your knowledge with our wide range of quizzes and learn something new today!</p>
-            <a href="{% url 'quizzes' %}" class="btn btn-primary">View Quizzes</a>
+            
+            {% if user.is_authenticated %}
+                <a href="{% url 'quizzes' %}" class="btn btn-primary">View Quizzes</a>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn btn-primary">Login to View Quizzes</a>
+            {% endif %}
+            
         </div>
     </div>
 </div>
 {% endblock %}
-

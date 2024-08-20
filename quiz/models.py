@@ -40,7 +40,7 @@ class QuizAttempt(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
     score = models.IntegerField()
     date_taken = models.DateTimeField(auto_now_add=True)
-    # date_taken = timezone.now()
+    is_completed = models.BooleanField(default=False)  
 
     def __str__(self):
         return f'{self.user.username} - {self.quiz.title} - Score: {self.score}'
