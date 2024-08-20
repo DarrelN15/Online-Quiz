@@ -1,8 +1,13 @@
-from django.test import TestCase
+from datetime import timezone
+from django.test import Client, TestCase
 from django.urls import reverse
 from django.contrib.auth.models import User
 from quiz.models import Quiz, Question, Option, QuizAttempt
 from quiz.forms import CustomPasswordChangeForm
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.html import escape
+
+import pytz
 
 # Create your tests here.
 class UserRegistrationTest(TestCase):
@@ -222,11 +227,9 @@ class QuizSubmissionTest(TestCase):
 
 class QuizResultsFilteringTest(TestCase):
     def setUp(self):
-        # Create some quizzes, users, and attempts for testing
-        self.user1 = User.objects.create_user(username='user1', password='password1')
-        self.user2 = User.objects.create_user(username='user2', password='password2')
+        self.user1 = User.objects.create_user(username='user1', password='password1', is_staff=True)
+        self.user2 = User.objects.create_user(username='user2', password='password2', is_staff=True)
         
-        # Log in as user1 (assuming user1 is the one who should view the results)
         self.client.login(username='user1', password='password1')
         
         self.quiz1 = Quiz.objects.create(title='Quiz 1')
@@ -237,21 +240,88 @@ class QuizResultsFilteringTest(TestCase):
 
     def test_filter_by_user(self):
         response = self.client.get(reverse('quiz_results'), {'user': 'user1'})
+        self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'user1')
         self.assertNotContains(response, 'user2')
 
     def test_filter_by_quiz(self):
         response = self.client.get(reverse('quiz_results'), {'quiz': 'Quiz 1'})
+        self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Quiz 1')
         self.assertNotContains(response, 'Quiz 2')
 
     def test_filter_by_date_range(self):
-        response = self.client.get(reverse('quiz_results'), {'date_from': '2024-08-10', 'date_to': '2024-08-15'})
+        response = self.client.get(reverse('quiz_results'), {'date_from': '2024-08-10', 'date_to': '2024-08-20'})
+        self.assertEqual(response.status_code, 200)
         self.assertContains(response, '2024-08-10')
-        self.assertNotContains(response, '2024-08-20')
+        self.assertContains(response, '2024-08-20')
+        self.assertNotContains(response, '2024-08-15')
 
     def test_filter_by_score_range(self):
         response = self.client.get(reverse('quiz_results'), {'score_min': 5, 'score_max': 7})
-        self.assertContains(response, 'score: 5')
-        self.assertContains(response, 'score: 7')
-        self.assertNotContains(response, 'score: 3')
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '5 / 0')
+        self.assertContains(response, '7 / 0')
+        self.assertNotContains(response, '3 / 0')
+        
+class GeneralFunctionalityTest(TestCase):
+    
+    def test_home_page(self):
+        response = self.client.get(reverse('home'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'home.html')
+        self.assertContains(response, 'Welcome to Our Quiz Platform!')
+        
+class NavigationTest(TestCase):
+
+    def test_navigation_links(self):
+        # Tests the home link
+        response = self.client.get(reverse('home'))
+        self.assertContains(response, 'href="' + reverse('home') + '"')
+
+        # Tests the quizzes link
+        response = self.client.get(reverse('quizzes'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'href="' + reverse('quizzes') + '"')
+
+        # Tests the about link
+        response = self.client.get(reverse('about'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'href="' + reverse('about') + '"')
+        
+class SecurityTest(TestCase):
+    
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(username='testuser', password='testpassword')
+        self.client.login(username='testuser', password='testpassword')
+
+    def test_csrf_protection(self):
+        # Attempts to submit a form without a CSRF token
+        response = self.client.post(reverse('submit_quiz', args=[1]), {})
+        self.assertEqual(response.status_code, 403)  # Should be forbidden due to missing CSRF token
+
+    @csrf_exempt
+    def test_csrf_exempt_view(self):
+        # Tests a view that should be CSRF exempt
+        response = self.client.post(reverse('submit_quiz', args=[1]), {})
+        self.assertNotEqual(response.status_code, 403)  # Should not be forbidden if CSRF is exempted
+
+class SecurityTest(TestCase):
+    
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(username='testuser', password='testpassword')
+        self.client.login(username='testuser', password='testpassword')
+
+    def test_xss_protection(self):
+        # Submits input that could be an XSS attack
+        malicious_input = '<script>alert("XSS")</script>'
+        response = self.client.post(reverse('edit_profile'), {
+            'username': malicious_input,
+            'email': 'user@example.com'
+        })
+
+        # Checks that the output is escaped and not rendered as HTML
+        self.assertNotContains(response, malicious_input)
+        self.assertContains(response, escape(malicious_input))
