@@ -268,27 +268,27 @@ def quiz_results_view(request):
     # Initial filter based on specific fields
     attempts = QuizAttempt.objects.all()
 
-    if user_filter:
+    if user_filter and user_filter != 'None':
         attempts = attempts.filter(user__username__icontains=user_filter)
     
-    if quiz_filter:
+    if quiz_filter and quiz_filter != 'None':
         attempts = attempts.filter(quiz__title__icontains=quiz_filter)
     
-    if date_from:
+    if date_from and date_from != 'None':
         attempts = attempts.filter(date_taken__gte=parse_date(date_from))
     
-    if date_to:
+    if date_to and date_to != 'None':
         attempts = attempts.filter(date_taken__lte=parse_date(date_to))
     
-    if score_min:
+    if score_min and score_min != 'None':
         attempts = attempts.filter(score__gte=int(score_min))
     
-    if score_max:
+    if score_max and score_max != 'None':
         attempts = attempts.filter(score__lte=int(score_max))
     
     # Implement the search functionality here
     search_query = request.GET.get('search')
-    if search_query:
+    if search_query and search_query != 'None':
         attempts = attempts.filter(
             Q(user__username__icontains=search_query) |
             Q(quiz__title__icontains=search_query) |
@@ -346,6 +346,7 @@ def quiz_results_view(request):
         'quiz_filter': quiz_filter,
         'search_query': search_query,  # Pass the search query back to the template
     })
+
 
 
 @login_required
