@@ -31,5 +31,14 @@
         </ul>
     </div>
     {% endfor %}
+
+    <!-- Admin-only section for resetting the quiz attempt -->
+    {% if user.is_staff %}
+    <hr>
+    <form action="{% url 'reset_quiz_attempt' attempt.id %}" method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-warning">Reset Quiz for User</button>
+    </form>
+    {% endif %}
 </div>
 {% endblock %}

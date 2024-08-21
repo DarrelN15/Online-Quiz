@@ -420,3 +420,16 @@ def change_password(request):
     else:
         form = PasswordChangeForm(request.user)
     return render(request, 'change_password.html', {'form': form})
+
+@login_required
+def reset_quiz_attempt(request, attempt_id):
+    if request.method == 'POST' and request.user.is_staff:
+        try:
+            attempt = QuizAttempt.objects.get(id=attempt_id)
+            attempt.delete()  # This deletes the existing quiz attempt
+            messages.success(request, "The quiz attempt has been reset successfully.")
+        except QuizAttempt.DoesNotExist:
+            messages.error(request, "Quiz attempt not found.")
+        return redirect('home')  # Redirects to the home page after resetting
+    else:
+        return redirect('home')  # Redirects to home if the request is not POST or user is not an admin
