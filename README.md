@@ -1,5 +1,17 @@
 # Online Quiz Project
 
+## Table of Contents
+- [Overview](#overview)
+- [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Testing](#testing)
+- [Troubleshooting](#troubleshooting)
+- [Future Work](#future-work)
+- [Contributing](#contributing)
+- [License](#license)
+- [Author](#author)
+
 ## Overview
 
 This project is a Django-based online quiz application that allows users to participate in quizzes, view their results, and manage quizzes through an admin interface. The project is built using Django 5.0.7 and has been configured to use a PostgreSQL database for data management.
@@ -87,6 +99,7 @@ This project is a Django-based online quiz application that allows users to part
 *    Access the application at http://127.0.0.1:8000/.
 *    Access the admin interface at http://127.0.0.1:8000/admin/.
 
+
 **Troubleshooting**
 
 *    Admin Results Page Redirects to Home: Ensure that the user accessing the admin results page is a staff member with the correct permissions.
@@ -94,10 +107,7 @@ This project is a Django-based online quiz application that allows users to part
    
 **Future Work**
 
-*    Continue Working to get quiz results to save to database.
-*    Enhance the UI with more responsive and user-friendly features.
-*    Add support for more question types.
-*    Implement user profiles.
+*    Continued Maintenance of web application
 
 ## Author
 
