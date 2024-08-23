@@ -3,11 +3,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Online Quiz{% endblock %}</title>
+    <meta charset="UTF-8"> <!-- Sets the character encoding for the document -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Ensures proper scaling on mobile devices -->
+    <title>{% block title %}Online Quiz{% endblock %}</title> <!-- Sets the title of the page, can be overridden by child templates -->
     <!-- Bootstrap CSS -->
-    <link href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet"> <!-- Links to Bootstrap CSS for styling -->
     <style>
         html, body {
             height: 100%;
@@ -19,13 +19,13 @@
         .wrapper {
             display: flex;
             flex-direction: column;
-            min-height: 100vh;
+            min-height: 100vh; <!-- Ensures the wrapper takes up the full height of the viewport -->
         }
 
         /* Main content flexes to fill remaining space */
         .content {
             flex: 1;
-            padding-top: 56px;
+            padding-top: 56px; <!-- Adds padding to the top of the content -->
         }
 
         footer {
@@ -39,46 +39,46 @@
 </head>
 <body>
     <div class="wrapper">
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top"> <!-- Creates a responsive navigation bar -->
             <div class="container-fluid">
-                <a class="navbar-brand" href="{% url 'home' %}">Online Quiz</a>
+                <a class="navbar-brand" href="{% url 'home' %}">Online Quiz</a> <!-- Logo linking to the home page -->
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
+                    <span class="navbar-toggler-icon"></span> <!-- Toggler for collapsed navbar on smaller screens -->
                 </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="collapse navbar-collapse" id="navbarNav"> <!-- Collapsible navigation links -->
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'home' %}">Home</a>
+                            <a class="nav-link" href="{% url 'home' %}">Home</a> <!-- Link to the home page -->
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'quizzes' %}">Quizzes</a>
+                            <a class="nav-link" href="{% url 'quizzes' %}">Quizzes</a> <!-- Link to the quizzes page -->
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'about' %}">About</a>
+                            <a class="nav-link" href="{% url 'about' %}">About</a> <!-- Link to the about page -->
                         </li>
                     </ul>
-                    <ul class="navbar-nav ms-auto">
+                    <ul class="navbar-nav ms-auto"> <!-- Right-aligned navigation links -->
                         {% if user.is_authenticated %}
                             {% if user.is_staff %}
                                 <li class="nav-item">
-                                    <a class="nav-link" href="{% url 'quiz_results' %}">Quiz Results</a>
+                                    <a class="nav-link" href="{% url 'quiz_results' %}">Quiz Results</a> <!-- Link to quiz results page for staff -->
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="{% url 'admin:index' %}">Admin</a>
+                                    <a class="nav-link" href="{% url 'admin:index' %}">Admin</a> <!-- Link to admin panel for staff -->
                                 </li>
                             {% endif %}
                             <li class="nav-item">
-                                <a class="nav-link" href="{% url 'profile' %}">Profile</a>
+                                <a class="nav-link" href="{% url 'profile' %}">Profile</a> <!-- Link to user profile page -->
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+                                <a class="nav-link" href="{% url 'logout' %}">Logout</a> <!-- Link to log out -->
                             </li>
                         {% else %}
                             <li class="nav-item">
-                                <a class="nav-link" href="{% url 'login' %}">Login</a>
+                                <a class="nav-link" href="{% url 'login' %}">Login</a> <!-- Link to log in page -->
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="{% url 'register' %}">Register</a>
+                                <a class="nav-link" href="{% url 'register' %}">Register</a> <!-- Link to registration page -->
                             </li>
                         {% endif %}
                     </ul>                
@@ -94,14 +94,24 @@
         </div>
 
         <!-- Footer -->
-        <footer class="bg-dark text-white mt-5 p-4 text-center">
-            <p>&copy; {{ year }} Online Quiz. All Rights Reserved.</p>
+        <footer class="bg-dark text-white mt-5 p-6 text-center"> <!-- Footer with dark background and white text -->
+            <p>&copy; {{ year }} Online Quiz. All Rights Reserved.</p> <!-- Displays the copyright information -->
+            <p>Contact me at <a href="mailto:darrelnitereka@gmail.com">darrelnitereka@gmail.com</a></p> <!-- Provides contact email -->
+            </p>
+            <p>
+                <a href="https://github.com/DarrelN15/Online-Quiz/tree/main" class="text-white">Github</a> | <!-- Link to GitHub -->
+                <a href="https://www.linkedin.com/in/darrel-nitereka-414452233" class="text-white">Linkedin</a> <!-- Link to LinkedIn -->
+            </p>
+            {% comment %} <p>
+                <img src="{% static 'images/logo-small.png' %}" alt="Online Quiz Logo" style="width: 50px;" />
+            </p> {% endcomment %} <!-- This commented-out section suggests an image placeholder for a logo -->
         </footer>
+
     </div>
 
     <!-- Bootstrap JS and dependencies -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- Loads jQuery library -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script> <!-- Loads Popper.js library for tooltips and popovers -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script> <!-- Loads Bootstrap JS library -->
 </body>
 </html>

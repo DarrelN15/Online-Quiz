@@ -4,18 +4,16 @@
 
 {% block content %}
 <div class="container">
-    <h2 class="mt-5">{{ quiz.title }}</h2>
-    
+    <h2 class="mt-5">{{ quiz.title }}</h2> <!-- Displays the title of the quiz -->
+
+    <!-- Section to display the user's score -->
     <div class="alert alert-info mt-4 p-4">
-        <h4 class="text-center">Your Score</h4>
+        <h4 class="text-center">Your Score</h4> <!-- Heading for the score section -->
         <p class="display-4 text-center">
-            <strong>{{ score }}</strong> / <strong>{{ total }}</strong>
+            <strong>{{ score }}</strong> / <strong>{{ total }}</strong> <!-- Displays the user's score out of the total possible score -->
         </p>
-        {% comment %} <p class="lead text-center">
-            That's <strong>{{ percentage|floatformat:2 }}%</strong>
-        </p> {% endcomment %}
     </div>
 
-    <p class="text-center">Thank you for taking the quiz!</p>
+    <p class="text-center">Thank you for taking the quiz!</p> <!-- Displays a thank you message -->
 </div>
 {% endblock %}

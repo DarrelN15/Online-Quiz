@@ -13,11 +13,6 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 import os
 from pathlib import Path
 
-import pytest
-
-import online_quiz_project
-import quiz
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -138,53 +133,31 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
+    'version': 1,  # Specifies the version of the logging configuration schema
+    'disable_existing_loggers': False,  # Keeps the default loggers enabled
     'handlers': {
         'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
+            'level': 'DEBUG',  # Sets the logging level for the console handler
+            'class': 'logging.StreamHandler',  # Specifies the handler class that outputs logs to the console
         },
     },
     'loggers': {
         'django': {
-            'handlers': ['console'],
-            'level': 'INFO',
+            'handlers': ['console'],  # Directs Django's logs to the console
+            'level': 'INFO',  # Sets the logging level for Django logs
         },
-         'quiz': {  
-            'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': False,
+        'quiz': {  
+            'handlers': ['console'],  # Directs logs from the 'quiz' app to the console
+            'level': 'DEBUG',  # Sets the logging level for the 'quiz' app logs
+            'propagate': False,  # Prevents log messages from being propagated to other loggers
         },
     },
 }
 
-# LOGGING = {
-#     'version': 1,
-#     'disable_existing_loggers': False,
-#     'handlers': {
-#         'console': {
-#             'level': 'DEBUG',
-#             'class': 'logging.StreamHandler',
-#         },
-#     },
-#     'loggers': {
-#         'django': {
-#             'handlers': ['console'],
-#             'level': 'DEBUG',
-#             'propagate': True,
-#         },
-#         'quiz': {  # Replace with your app's name
-#             'handlers': ['console'],
-#             'level': 'DEBUG',
-#             'propagate': False,
-#         },
-#     },
-# }
+LOGIN_REDIRECT_URL = '/'  # Redirects users to the home page after successful login
 
-LOGIN_REDIRECT_URL = '/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Directory where static files will be collected for deployment
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
-# [pytest]
-# DJANGO_SETTINGS_MODULE = quiz.settings
+STATICFILES_DIRS = [
+    BASE_DIR / "static",  # Directory where static files are stored during development
+]

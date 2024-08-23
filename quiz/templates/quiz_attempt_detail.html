@@ -3,21 +3,21 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h2>Quiz Attempt Details</h2>
-    <p><strong>User:</strong> {{ attempt.user.username }}</p>
-    <p><strong>Quiz:</strong> {{ attempt.quiz.title }}</p>
-    <p><strong>Date Taken:</strong> {{ attempt.date_taken }}</p>
-    <p><strong>Score:</strong> {{ correct_answers }} out of {{ total_questions }} ({{ percentage_score }}%)</p>
+    <h2>Quiz Attempt Details</h2> <!-- Displays the heading for the quiz attempt details page -->
+    <p><strong>User:</strong> {{ attempt.user.username }}</p> <!-- Displays the username of the user who took the quiz -->
+    <p><strong>Quiz:</strong> {{ attempt.quiz.title }}</p> <!-- Displays the title of the quiz -->
+    <p><strong>Date Taken:</strong> {{ attempt.date_taken }}</p> <!-- Displays the date the quiz was taken -->
+    <p><strong>Score:</strong> {{ correct_answers }} out of {{ total_questions }} ({{ percentage_score }}%)</p> <!-- Displays the user's score -->
 
-    <hr>
+    <hr> <!-- Adds a horizontal line to separate sections -->
 
     {% for item in question_data %}
     <div class="question-detail mb-4">
-        <h4>{{ item.question.text }}</h4>
+        <h4>{{ item.question.text }}</h4> <!-- Displays the text of the question -->
         <p><strong>Correct Answers:</strong></p>
         <ul>
             {% for option in item.correct_options %}
-            <li>{{ option.text }}</li>
+            <li>{{ option.text }}</li> <!-- Lists the correct answers for the question -->
             {% endfor %}
         </ul>
 
@@ -25,7 +25,7 @@
         <ul>
             {% for option in item.selected_options %}
             <li class="{% if option in item.correct_options %}text-success{% else %}text-danger{% endif %}">
-                {{ option.text }}
+                {{ option.text }} <!-- Highlights the user's selected answers; correct answers are in green, incorrect ones are in red -->
             </li>
             {% endfor %}
         </ul>
@@ -34,10 +34,10 @@
 
     <!-- Admin-only section for resetting the quiz attempt -->
     {% if user.is_staff %}
-    <hr>
+    <hr> <!-- Adds a horizontal line before the admin section -->
     <form action="{% url 'reset_quiz_attempt' attempt.id %}" method="post">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-warning">Reset Quiz for User</button>
+        {% csrf_token %} <!-- Adds CSRF token for security purposes -->
+        <button type="submit" class="btn btn-warning">Reset Quiz for User</button> <!-- Button to reset the quiz attempt for the user -->
     </form>
     {% endif %}
 </div>

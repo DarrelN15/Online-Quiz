@@ -1,5 +1,3 @@
-
-
 {% extends 'base.html' %}
 {% load static %}
 
@@ -7,17 +5,23 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h2>User Profile</h2>
+    <h2>User Profile</h2> <!-- Displays the heading for the user profile page -->
     
-    <p><strong>Username:</strong> {{ user.username }}</p>
-    <p><strong>Email:</strong> {{ user.email }}</p>
-    <p><strong>Date Joined:</strong> {{ user.date_joined }}</p>
-    
-    {% if is_admin %}
-    <p><strong>Status:</strong> Admin Account </p>
+    <p><strong>Username:</strong> {{ user.username }}</p> <!-- Displays the user's username -->
+    <p><strong>Email:</strong> {{ user.email }}</p> <!-- Displays the user's email -->
+    <p><strong>Date Joined:</strong> {{ user.date_joined }}</p> <!-- Displays the date the user joined -->
+
+    {% if user.first_name or user.last_name %}
+    <p><strong>Name:</strong> {{ user.first_name }} {{ user.last_name }}</p> <!-- Displays the user's first and last name if available -->
     {% endif %}
     
+    {% if is_admin %}
+    <p><strong>Status:</strong> Admin Account </p> <!-- Indicates if the user is an admin -->
+    {% endif %}
+    
+    <!-- Button to navigate to the edit profile page -->
     <a href="{% url 'edit_profile' %}" class="btn btn-primary">Edit Profile</a>
+    <!-- Button to navigate to the change password page -->
     <button type="button" class="btn btn-primary" onclick="window.location.href='{% url 'change_password' %}'">Change Password</button>
 
 </div>

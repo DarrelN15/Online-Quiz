@@ -17,42 +17,48 @@ from django.contrib.auth import update_session_auth_hash
 from django.contrib import messages
 from .forms import EditProfileForm, CustomPasswordChangeForm
 from django.contrib.auth.models import User
+from .forms import CustomUserCreationForm
 from django.db.models import Q
 from django.utils.dateparse import parse_date
 import logging
 
+# Initialize logger for this module
 logger = logging.getLogger(__name__)
 
+# Test logging functionality
 def test_logging(request):
     logger.debug("Test logging view called")
     return HttpResponse("Logging test successful")
 
+# Home page view
 def home(request):
     return render(request, 'home.html')
 
+# View to display list of quizzes, requires login
 @login_required
 def quizzes_view(request):
     logger.debug("Quiz view called")
-    quizzes_list = Quiz.objects.all().order_by('id')
+    quizzes_list = Quiz.objects.all().order_by('id')  # Fetch all quizzes ordered by ID
     paginator = Paginator(quizzes_list, 10)  # Show 10 quizzes per page
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     return render(request, 'quizzes.html', {'quizzes': page_obj})
 
+# About page view
 def about(request):
     logger.debug(f"About view called")
     return render(request, 'about.html')
 
+# View for quiz detail and taking the quiz, requires login
 @login_required
 def quiz_detail(request, quiz_id):
     logger.debug("Quiz Detail view called")
-    quiz = get_object_or_404(Quiz, id=quiz_id)
+    quiz = get_object_or_404(Quiz, id=quiz_id)  # Fetch the quiz or return 404 if not found
     questions = quiz.questions.all()
 
     # Check if the user has already completed this quiz
     try:
         quiz_attempt = QuizAttempt.objects.get(user=request.user, quiz=quiz, is_completed=True)
-        # If a completed attempt exists, show the result page
         score = quiz_attempt.score
         incorrect_answers = len(questions) - score
         return render(request, 'quiz_result.html', {
@@ -62,10 +68,10 @@ def quiz_detail(request, quiz_id):
             'incorrect_answers': incorrect_answers  # Pass incorrect answers
         })
     except QuizAttempt.DoesNotExist:
-        # If no completed attempt exists, allow the user to take the quiz
+        # Allow the user to take the quiz
         for question in questions:
             options = list(question.options.all())
-            random.shuffle(options)
+            random.shuffle(options)  # Shuffle options to randomize their order
             question.shuffled_options = options
 
         if request.method == 'POST':
@@ -95,7 +101,7 @@ def quiz_detail(request, quiz_id):
             'questions': questions
         })
 
-        
+# View to handle quiz submission, requires login
 @login_required
 def submit_quiz(request, quiz_id):
     logger.debug(f"Submit Quiz view called for quiz_id: {quiz_id}")
@@ -174,25 +180,22 @@ def submit_quiz(request, quiz_id):
 
     return redirect('quiz_detail', quiz_id=quiz_id)
 
-
-
-
+# User registration view
 def register(request):
     logger.debug(f"Register view called")
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             form.save()
             return redirect('login')
     else:
-        form = UserCreationForm()
+        form = CustomUserCreationForm()
     return render(request, 'register.html', {'form': form})
 
+# Login success view
 def login_success_view(request):
     logger.debug(f"Login view called")
     return redirect('home')
-
-from django.db.models import Q
 
 @staff_member_required
 def quiz_results_view(request):
@@ -228,7 +231,7 @@ def quiz_results_view(request):
         attempts = attempts.filter(score__gte=int(score_min))
     
     if score_max and score_max != 'None':
-        attempts = attempts.filter(score__lte=int(score_max))
+        attempts = attempts.filter(score__lte(int(score_max)))
     
     # Implement the search functionality here
     search_query = request.GET.get('search')
@@ -291,11 +294,10 @@ def quiz_results_view(request):
         'search_query': search_query,  # Pass the search query back to the template
     })
 
-
-
+# View to display details of a specific quiz attempt, requires login
 @login_required
 def quiz_attempt_detail(request, attempt_id):
-    attempt = get_object_or_404(QuizAttempt, id=attempt_id)
+    attempt = get_object_or_404(QuizAttempt, id=attempt_id)  # Get the quiz attempt or return 404 if not found
     questions = attempt.quiz.questions.all()
 
     # Prepare a list of dictionaries to pass to the template
@@ -329,16 +331,19 @@ def quiz_attempt_detail(request, attempt_id):
     }
     return render(request, 'quiz_attempt_detail.html', context)
 
+# View to handle user logout
 def logout_view(request):
     logger.debug(f"Logout view called")
     logout(request)
     return redirect('home')
 
+# View to display user profile, requires login
 @login_required
 def profile_view(request):
     is_admin = request.user.is_staff  # Check if the user is an admin
     return render(request, 'profile.html', {'is_admin': is_admin})
 
+# View to handle editing user profile, requires login
 @login_required
 def edit_profile(request):
     if request.method == 'POST':
@@ -351,6 +356,7 @@ def edit_profile(request):
         form = EditProfileForm(instance=request.user)
     return render(request, 'edit_profile.html', {'form': form})
 
+# View to handle changing user password, requires login
 @login_required
 def change_password(request):
     if request.method == 'POST':
@@ -366,6 +372,7 @@ def change_password(request):
         form = PasswordChangeForm(request.user)
     return render(request, 'change_password.html', {'form': form})
 
+# View to reset a specific quiz attempt, requires login and staff status
 @login_required
 def reset_quiz_attempt(request, attempt_id):
     if request.method == 'POST' and request.user.is_staff:
@@ -378,7 +385,8 @@ def reset_quiz_attempt(request, attempt_id):
         return redirect('home')  # Redirects to the home page after resetting
     else:
         return redirect('home')  # Redirects to home if the request is not POST or user is not an admin
-    
+
+# View to export quiz results as a CSV file, requires staff status
 @staff_member_required
 def export_quiz_results_csv(request):
     # Create the HttpResponse object with the appropriate CSV header.
@@ -406,6 +414,7 @@ def export_quiz_results_csv(request):
 
     return response
 
+# View to reset filters for the quiz results view, requires staff status
 @staff_member_required
 def reset_filters(request):
     return redirect('quiz_results')

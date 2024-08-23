@@ -3,26 +3,109 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Register</title>
+    <title>Register</title> <!-- Sets the title of the registration page -->
     <!-- Bootstrap CSS -->
-    <link href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet"> <!-- Links to Bootstrap CSS for styling -->
+    <style>
+        .errorlist {
+            color: red;
+            list-style-type: none;
+            padding-left: 0; <!-- Styles for displaying form errors -->
+        }
+        .form-group {
+            margin-bottom: 1.5rem; <!-- Adds spacing between form groups -->
+        }
+        .password-help-text {
+            font-size: 0.875em;
+            color: #6c757d; <!-- Styles the password help text -->
+        }
+        .register-container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            background-color: #f8f9fa; <!-- Light background for the form container -->
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); <!-- Adds a shadow for depth -->
+        }
+    </style>
 </head>
 <body>
-    <div class="container-fluid mt-5">
-        <h2 class="mb-4">Register</h2>
-        <form method="post">
-            {% csrf_token %}
-            <div class="mb-3">
-                {{ form.as_p }}
+    <div class="container mt-5">
+        <div class="row justify-content-start">
+            <div class="col-md-6">
+                <div class="register-container">
+                    <h2 class="mb-4">Register</h2> <!-- Heading for the registration form -->
+                    <form method="post">
+                        {% csrf_token %} <!-- Adds CSRF token for security purposes -->
+
+                        <!-- Username field -->
+                        <div class="form-group">
+                            {{ form.username.label_tag }} <!-- Label for the username field -->
+                            {{ form.username }} <!-- Input field for the username -->
+                            {% if form.username.errors %}
+                                <ul class="errorlist">{{ form.username.errors }}</ul> <!-- Displays errors for the username field -->
+                            {% endif %}
+                        </div>
+
+                        <!-- First name field -->
+                        <div class="form-group">
+                            {{ form.first_name.label_tag }} <!-- Label for the first name field -->
+                            {{ form.first_name }} <!-- Input field for the first name -->
+                            {% if form.first_name.errors %}
+                                <ul class="errorlist">{{ form.first_name.errors }}</ul> <!-- Displays errors for the first name field -->
+                            {% endif %}
+                        </div>
+
+                        <!-- Last name field -->
+                        <div class="form-group">
+                            {{ form.last_name.label_tag }} <!-- Label for the last name field -->
+                            {{ form.last_name }} <!-- Input field for the last name -->
+                            {% if form.last_name.errors %}
+                                <ul class="errorlist">{{ form.last_name.errors }}</ul> <!-- Displays errors for the last name field -->
+                            {% endif %}
+                        </div>
+
+                        <!-- Email field -->
+                        <div class="form-group">
+                            {{ form.email.label_tag }} <!-- Label for the email field -->
+                            {{ form.email }} <!-- Input field for the email -->
+                            {% if form.email.errors %}
+                                <ul class="errorlist">{{ form.email.errors }}</ul> <!-- Displays errors for the email field -->
+                            {% endif %}
+                        </div>
+
+                        <!-- Password field -->
+                        <div class="form-group">
+                            {{ form.password1.label_tag }} <!-- Label for the password field -->
+                            {{ form.password1 }} <!-- Input field for the password -->
+                            {% if form.password1.errors %}
+                                <ul class="errorlist">{{ form.password1.errors }}</ul> <!-- Displays errors for the password field -->
+                            {% endif %}
+                            <small class="password-help-text">
+                                Your password must contain at least 8 characters, cannot be too common, and should include a mix of letters, numbers, and symbols.
+                            </small> <!-- Help text for the password requirements -->
+                        </div>
+
+                        <!-- Password confirmation field -->
+                        <div class="form-group">
+                            {{ form.password2.label_tag }} <!-- Label for the password confirmation field -->
+                            {{ form.password2 }} <!-- Input field for the password confirmation -->
+                            {% if form.password2.errors %}
+                                <ul class="errorlist">{{ form.password2.errors }}</ul> <!-- Displays errors for the password confirmation field -->
+                            {% endif %}
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Register</button> <!-- Submit button for the registration form -->
+                    </form>
+                    <p class="mt-3">Already have an account?</p>
+                    <a href="{% url 'login' %}" class="btn btn-secondary">Go to Login</a> <!-- Link to the login page -->
+                </div>
             </div>
-            <button type="submit" class="btn btn-primary">Register</button>
-        </form>
-        <p class="mt-3">Already have an account?</p>
-        <a href="{% url 'login' %}" class="btn btn-secondary">Go to Login</a> <!-- Button to go to login -->
+        </div>
     </div>
     <!-- Bootstrap JS and dependencies -->
-    <script src="{% static 'jquery/dist/jquery.min.js' %}"></script>
-    <script src="{% static '@popperjs/core/dist/umd/popper.min.js' %}"></script>
-    <script src="{% static 'bootstrap/dist/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'jquery/dist/jquery.min.js' %}"></script> <!-- Loads jQuery library -->
+    <script src="{% static '@popperjs/core/dist/umd/popper.min.js' %}"></script> <!-- Loads Popper.js library -->
+    <script src="{% static 'bootstrap/dist/js/bootstrap.min.js' %}"></script> <!-- Loads Bootstrap JS library -->
 </body>
 </html>

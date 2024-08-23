@@ -18,8 +18,15 @@ from django.contrib import admin
 from django.urls import path, include
 
 urlpatterns = [
-    path('admin/results/', include('quiz.urls')),  # Make sure this is before the admin pattern
+    # Routes the '/admin/results/' URL to the URLs defined in the 'quiz' app
+    path('admin/results/', include('quiz.urls')), 
+    
+    # Admin site URL
     path('admin/', admin.site.urls),
+    
+    # Includes default authentication URLs (login, logout, password change/reset) provided by Django
     path('accounts/', include('django.contrib.auth.urls')),
+    
+    # Includes the URLs defined in the 'quiz' app for the root of the site
     path('', include('quiz.urls')),
 ]
