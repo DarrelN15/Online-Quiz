@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -77,7 +78,7 @@ WSGI_APPLICATION = 'online_quiz_project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'your_database_name',
+        'NAME': 'online_quiz_db',
         'USER': 'postgres',
         'PASSWORD': 'burundi15',
         'HOST': 'localhost',  # or your PostgreSQL server's address
@@ -110,7 +111,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Los_Angeles'
 
 USE_I18N = True
 
@@ -132,20 +133,31 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
+    'version': 1,  # Specifies the version of the logging configuration schema
+    'disable_existing_loggers': False,  # Keeps the default loggers enabled
     'handlers': {
         'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
+            'level': 'DEBUG',  # Sets the logging level for the console handler
+            'class': 'logging.StreamHandler',  # Specifies the handler class that outputs logs to the console
         },
     },
     'loggers': {
         'django': {
-            'handlers': ['console'],
-            'level': 'INFO',
+            'handlers': ['console'],  # Directs Django's logs to the console
+            'level': 'INFO',  # Sets the logging level for Django logs
+        },
+        'quiz': {  
+            'handlers': ['console'],  # Directs logs from the 'quiz' app to the console
+            'level': 'DEBUG',  # Sets the logging level for the 'quiz' app logs
+            'propagate': False,  # Prevents log messages from being propagated to other loggers
         },
     },
 }
 
-LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/'  # Redirects users to the home page after successful login
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Directory where static files will be collected for deployment
+
+STATICFILES_DIRS = [
+    BASE_DIR / "static",  # Directory where static files are stored during development
+]

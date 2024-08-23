@@ -4,95 +4,109 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>{{ quiz.title }}</title>
-    <link href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet">
+    <title>{{ quiz.title }}</title> <!-- Sets the page title to the quiz title -->
+    <link href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet"> <!-- Links to Bootstrap CSS for styling -->
     <style>
         .quiz-content {
-            user-select: none;
+            user-select: none; <!-- Disables text selection within the quiz content -->
         }
     </style>
 </head>
 <body style="margin-top: 75px;">
+    <!-- Navigation bar at the top of the page -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
         <div class="container-fluid">
-            <a class="navbar-brand" href="{% url 'home' %}">Online Quiz</a>
+            <a class="navbar-brand" href="{% url 'home' %}">Online Quiz</a> <!-- Link to home page -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
+                <span class="navbar-toggler-icon"></span> <!-- Toggler icon for collapsed navbar on smaller screens -->
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'home' %}">Home</a>
+                        <a class="nav-link" href="{% url 'home' %}">Home</a> <!-- Link to home page -->
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'quizzes' %}">Quizzes</a>
+                        <a class="nav-link" href="{% url 'quizzes' %}">Quizzes</a> <!-- Link to quizzes page -->
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'about' %}">About</a>
+                        <a class="nav-link" href="{% url 'about' %}">About</a> <!-- Link to about page -->
                     </li>
                 </ul>
-                <ul class="navbar-nav ms-auto">
+                <ul class="navbar-nav ms-auto"> <!-- Right-aligned links -->
                     {% if user.is_authenticated %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'admin:index' %}">Admin</a>
+                            <a class="nav-link" href="{% url 'admin:index' %}">Admin</a> <!-- Link to admin panel -->
                         </li>
                         <li class="nav-item">
-                            <form method="post" action="{% url 'logout' %}" class="d-inline">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-link nav-link" style="padding: 0; border: none; background: none;">
-                                    Logout
-                                </button>
-                            </form>
+                            <a class="nav-link" href="{% url 'logout' %}">Logout</a> <!-- Link to logout -->
                         </li>
                     {% else %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'login' %}">Login</a>
+                            <a class="nav-link" href="{% url 'login' %}">Login</a> <!-- Link to login -->
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'register' %}">Register</a>
+                            <a class="nav-link" href="{% url 'register' %}">Register</a> <!-- Link to registration page -->
                         </li>
                     {% endif %}
                 </ul>
             </div>
         </div>
     </nav>    
+
+    <!-- Main quiz content -->
     <div class="container-fluid mt-5 quiz-content">
-        <h2>{{ quiz.title }}</h2>
+        <h2>{{ quiz.title }}</h2> <!-- Displays the quiz title -->
         
+        <p>{{ quiz.description }}</p> <!-- Displays the quiz description -->
+    
         {% if score is not None %}
             <div class="quiz-result">
-                <h2>Your Score: {{ score }} out of {{ total }}</h2>
-                <!-- Return to Homepage Button -->
+                <h2>Your Score: {{ score }} out of {{ total }}</h2> <!-- Displays the user's score -->
+                <!-- Button to return to the homepage and reset the quiz -->
                 <a href="{% url 'home' %}" onclick="resetQuiz()" class="btn btn-primary mt-3">Return to Homepage</a>
             </div>
         {% else %}
-            <form id="quiz-form" method="POST">
-                {% csrf_token %}
-                {% for question in questions %}
-                    <div class="mb-4">
-                        <h5>{{ question.text }}</h5>
+        <form id="quiz-form" method="POST" action="{% url 'submit_quiz' quiz.id %}">
+            {% csrf_token %}
+            {% for question in questions %}
+                <div class="mb-4">
+                    <h5>{{ forloop.counter }}. {{ question.text }}</h5>
+                    {% if question.question_type == 'SC' %}
+                        {% for option in question.shuffled_options %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="{{ question.id }}" value="{{ option.id }}">
+                                <label class="form-check-label">{{ option.text }}</label>
+                            </div>
+                        {% endfor %}
+                    {% elif question.question_type == 'MC' %}
                         {% for option in question.shuffled_options %}
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" name="{{ question.id }}" value="{{ option.id }}">
                                 <label class="form-check-label">{{ option.text }}</label>
                             </div>
                         {% endfor %}
-                    </div>
-                {% endfor %}
-                <button type="submit" class="btn btn-primary">Submit Quiz</button>
-            </form>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary">Submit Quiz</button>
+        </form>
         {% endif %}
-    </div>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>
+    </div>    
+
+    <!-- JavaScript Section -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- Loads jQuery library -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script> <!-- Loads Popper.js library -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script> <!-- Loads Bootstrap JS library -->
 
     <!-- JavaScript for handling local storage and warnings -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const savedAnswers = JSON.parse(localStorage.getItem('quizAnswers')) || {};
-            let isFormChanged = false;
+            console.log("Clearing local storage on page load...");
+            localStorage.removeItem('quizAnswers');  // Clears stored quiz answers on page load
+            const savedAnswers = JSON.parse(localStorage.getItem('quizAnswers')) || {};  // Retrieves saved answers from local storage
+            let isFormChanged = false;  // Tracks if the form has been changed
     
+            // Restores saved answers from local storage
             for (const questionId in savedAnswers) {
                 const options = document.getElementsByName(questionId);
                 options.forEach(option => {
@@ -103,6 +117,7 @@
                 });
             }
     
+            // Updates local storage when an option is selected
             const inputs = document.querySelectorAll('input[type="radio"], input[type="checkbox"]');
             inputs.forEach(input => {
                 input.addEventListener('change', function() {
@@ -116,14 +131,34 @@
                 });
             });
     
+            // Handles form submission
             const form = document.getElementById('quiz-form');
             if (form) {
                 form.addEventListener('submit', function(event) {
-                    isFormChanged = false; // Clear the change flag to prevent warning
-                    window.removeEventListener('beforeunload', handleBeforeUnload); // Remove the beforeunload listener
-                });
-            }
+                    let unansweredQuestions = false;
+                    const questions = document.querySelectorAll('.quiz-content .mb-4');
     
+                    // Checks for unanswered questions
+                    questions.forEach(function (question) {
+                        const inputs = question.querySelectorAll('input[type="radio"], input[type="checkbox"]');
+                        const isChecked = Array.from(inputs).some(input => input.checked);
+    
+                        if (!isChecked) {
+                            unansweredQuestions = true;
+                        }
+                    });
+    
+                    if (unansweredQuestions) {
+                        event.preventDefault(); // Prevents form submission if there are unanswered questions
+                        alert('You still have unanswered questions. Please answer all questions before submitting.');
+                    } else {
+                        isFormChanged = false; // Clears the change flag to prevent warning
+                        window.removeEventListener('beforeunload', handleBeforeUnload); // Removes the beforeunload listener
+                    }
+                });
+            }            
+    
+            // Warns user if they try to leave with unsaved changes
             function handleBeforeUnload(e) {
                 if (isFormChanged) {
                     const confirmationMessage = 'You have unsaved changes. Are you sure you want to leave?';
@@ -135,17 +170,20 @@
             window.addEventListener('beforeunload', handleBeforeUnload);
         });
     
+        // Resets the quiz by clearing local storage
         function resetQuiz() {
+            console.log("Resetting quiz...");
             localStorage.removeItem('quizAnswers'); 
         }
-
-        // Prevent copying, right-click, and certain key presses
+        
+    
+        // Prevents copying, right-clicking, and certain key presses for security
         document.addEventListener('contextmenu', event => event.preventDefault());
         document.addEventListener('keydown', function (event) {
             if ((event.ctrlKey && event.key === 's') || (event.ctrlKey && event.key === 'c')) {
                 event.preventDefault();
             }
         });
-    </script>
+    </script>    
 </body>
 </html>
