@@ -1,3 +1,4 @@
+import csv
 from django.http import HttpResponse
 import random
 from django.shortcuts import render, get_object_or_404
@@ -53,16 +54,19 @@ def quiz_detail(request, quiz_id):
         quiz_attempt = QuizAttempt.objects.get(user=request.user, quiz=quiz, is_completed=True)
         # If a completed attempt exists, show the result page
         score = quiz_attempt.score
-        return render(request, 'quiz_result.html', {'quiz': quiz, 'score': score, 'total': len(questions)})
+        incorrect_answers = len(questions) - score
+        return render(request, 'quiz_result.html', {
+            'quiz': quiz,
+            'score': score,
+            'total': len(questions),
+            'incorrect_answers': incorrect_answers  # Pass incorrect answers
+        })
     except QuizAttempt.DoesNotExist:
         # If no completed attempt exists, allow the user to take the quiz
         for question in questions:
             options = list(question.options.all())
             random.shuffle(options)
             question.shuffled_options = options
-
-        score = None
-        total = len(questions)
 
         if request.method == 'POST':
             score = 0
@@ -73,26 +77,44 @@ def quiz_detail(request, quiz_id):
                 if set(selected_options) == set(correct_options):
                     score += 1
 
+            # Calculate incorrect answers
+            incorrect_answers = len(questions) - score
+
             # Save the quiz attempt
             QuizAttempt.objects.create(user=request.user, quiz=quiz, score=score, is_completed=True)
 
-            return render(request, 'quiz_result.html', {'quiz': quiz, 'score': score, 'total': total})
+            return render(request, 'quiz_result.html', {
+                'quiz': quiz,
+                'score': score,
+                'total': len(questions),
+                'incorrect_answers': incorrect_answers  # Pass incorrect answers
+            })
 
-        return render(request, 'quiz_detail.html', {'quiz': quiz, 'questions': questions, 'score': score, 'total': total})
+        return render(request, 'quiz_detail.html', {
+            'quiz': quiz,
+            'questions': questions
+        })
 
+        
 @login_required
 def submit_quiz(request, quiz_id):
     logger.debug(f"Submit Quiz view called for quiz_id: {quiz_id}")
 
-    # Checks if the user has already completed this quiz
+    # Check if the user has already completed this quiz
     try:
         attempt = QuizAttempt.objects.get(user=request.user, quiz=quiz_id, is_completed=True)
         logger.info(f"User {request.user} has already completed quiz {quiz_id}. Redirecting to results.")
+        
+        # Calculate percentage
+        score = attempt.score
+        total_questions = attempt.quiz.questions.count()
+        percentage = (score / total_questions) * 100
+        
         return render(request, 'quiz_result.html', {
             'quiz': attempt.quiz,
-            'score': attempt.score,
-            'total': attempt.quiz.questions.count(),
-            'questions': attempt.quiz.questions.all()
+            'score': score,
+            'total': total_questions,
+            'percentage': percentage,
         })
     except QuizAttempt.DoesNotExist:
         pass  # User hasn't completed this quiz, allow them to submit
@@ -130,7 +152,7 @@ def submit_quiz(request, quiz_id):
 
         logger.info(f'User {request.user} submitted quiz {quiz_id} with score {score} out of {total_questions}')
 
-        # Updates the attempt with the final score and mark it as completed
+        # Update the attempt with the final score and mark it as completed
         attempt.score = score
         attempt.is_completed = True
         try:
@@ -139,15 +161,20 @@ def submit_quiz(request, quiz_id):
         except Exception as e:
             logger.error(f"Error updating QuizAttempt with final score: {e}")
 
-        # Renders the results on the same page
+        # Calculate percentage
+        percentage = (score / total_questions) * 100
+
+        # Render the results on the same page
         return render(request, 'quiz_result.html', {
             'quiz': quiz,
             'score': score,
             'total': total_questions,
-            'questions': questions
+            'percentage': percentage,
         })
 
     return redirect('quiz_detail', quiz_id=quiz_id)
+
+
 
 
 def register(request):
@@ -351,3 +378,34 @@ def reset_quiz_attempt(request, attempt_id):
         return redirect('home')  # Redirects to the home page after resetting
     else:
         return redirect('home')  # Redirects to home if the request is not POST or user is not an admin
+    
+@staff_member_required
+def export_quiz_results_csv(request):
+    # Create the HttpResponse object with the appropriate CSV header.
+    response = HttpResponse(
+        content_type='text/csv',
+        headers={'Content-Disposition': 'attachment; filename="quiz_results.csv"'},
+    )
+
+    writer = csv.writer(response)
+    writer.writerow(['User', 'Quiz Title', 'Score', 'Total Questions', 'Percentage', 'Date Taken'])
+
+    quiz_attempts = QuizAttempt.objects.all()
+
+    for attempt in quiz_attempts:
+        total_questions = attempt.quiz.questions.count()
+        percentage = (attempt.score / total_questions) * 100 if total_questions > 0 else 0
+        writer.writerow([
+            attempt.user.username,
+            attempt.quiz.title,
+            attempt.score,
+            total_questions,
+            f'{percentage:.2f}%',
+            attempt.date_taken.strftime('%Y-%m-%d %H:%M:%S')
+        ])
+
+    return response
+
+@staff_member_required
+def reset_filters(request):
+    return redirect('quiz_results')

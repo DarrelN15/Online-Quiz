@@ -63,23 +63,25 @@
                 <a href="{% url 'home' %}" onclick="resetQuiz()" class="btn btn-primary mt-3">Return to Homepage</a>
             </div>
         {% else %}
-        <form method="POST" action="{% url 'submit_quiz' quiz.id %}">
-                {% csrf_token %}
-                {% for question in questions %}
-                    <div class="mb-4">
-                        <h5>{{ question.text }}</h5>
-                        {% for option in question.shuffled_options %}
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="{{ question.id }}" value="{{ option.id }}">
-                                <label class="form-check-label">{{ option.text }}</label>
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% endfor %}
-                <button type="submit" class="btn btn-primary">Submit Quiz</button>
-            </form>
+        <form id="quiz-form" method="POST" action="{% url 'submit_quiz' quiz.id %}">
+            {% csrf_token %}
+            {% for question in questions %}
+                <div class="mb-4">
+                    <h5>{{ question.text }}</h5>
+                    {% for option in question.shuffled_options %}
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="{{ question.id }}" value="{{ option.id }}">
+                            <label class="form-check-label">{{ option.text }}</label>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary">Submit Quiz</button>
+        </form>            
         {% endif %}
     </div>
+
+    <!-- JavaScript Section -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>
@@ -87,9 +89,11 @@
     <!-- JavaScript for handling local storage and warnings -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            console.log("Clearing local storage on page load...");
+            localStorage.removeItem('quizAnswers');
             const savedAnswers = JSON.parse(localStorage.getItem('quizAnswers')) || {};
             let isFormChanged = false;
-    
+
             for (const questionId in savedAnswers) {
                 const options = document.getElementsByName(questionId);
                 options.forEach(option => {
@@ -99,7 +103,7 @@
                     }
                 });
             }
-    
+
             const inputs = document.querySelectorAll('input[type="radio"], input[type="checkbox"]');
             inputs.forEach(input => {
                 input.addEventListener('change', function() {
@@ -112,15 +116,32 @@
                     localStorage.setItem('quizAnswers', JSON.stringify(savedAnswers));
                 });
             });
-    
+
             const form = document.getElementById('quiz-form');
             if (form) {
                 form.addEventListener('submit', function(event) {
-                    isFormChanged = false; // Clear the change flag to prevent warning
-                    window.removeEventListener('beforeunload', handleBeforeUnload); // Remove the beforeunload listener
+                    let unansweredQuestions = false;
+                    const questions = document.querySelectorAll('.quiz-content .mb-4');
+                    
+                    questions.forEach(function (question) {
+                        const checkboxes = question.querySelectorAll('input[type="checkbox"]');
+                        const isChecked = Array.from(checkboxes).some(checkbox => checkbox.checked);
+                        
+                        if (!isChecked) {
+                            unansweredQuestions = true;
+                        }
+                    });
+            
+                    if (unansweredQuestions) {
+                        event.preventDefault(); // Prevent form submission
+                        alert('You still have unanswered questions. Please answer all questions before submitting.');
+                    } else {
+                        isFormChanged = false; // Clear the change flag to prevent warning
+                        window.removeEventListener('beforeunload', handleBeforeUnload); // Remove the beforeunload listener
+                    }
                 });
-            }
-    
+            }            
+
             function handleBeforeUnload(e) {
                 if (isFormChanged) {
                     const confirmationMessage = 'You have unsaved changes. Are you sure you want to leave?';
@@ -128,13 +149,15 @@
                     return confirmationMessage;
                 }
             }
-    
+
             window.addEventListener('beforeunload', handleBeforeUnload);
         });
-    
+
         function resetQuiz() {
+            console.log("Resetting quiz...");
             localStorage.removeItem('quizAnswers'); 
         }
+        
 
         // Prevent copying, right-click, and certain key presses
         document.addEventListener('contextmenu', event => event.preventDefault());

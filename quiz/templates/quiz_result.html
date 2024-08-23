@@ -4,8 +4,18 @@
 
 {% block content %}
 <div class="container">
-    <h2>{{ quiz.title }}</h2>
-    <p>Your Score: {{ score }} / {{ quiz.questions.count }}</p>
-    <p>Thank you for taking the quiz!</p>
+    <h2 class="mt-5">{{ quiz.title }}</h2>
+    
+    <div class="alert alert-info mt-4 p-4">
+        <h4 class="text-center">Your Score</h4>
+        <p class="display-4 text-center">
+            <strong>{{ score }}</strong> / <strong>{{ total }}</strong>
+        </p>
+        {% comment %} <p class="lead text-center">
+            That's <strong>{{ percentage|floatformat:2 }}%</strong>
+        </p> {% endcomment %}
+    </div>
+
+    <p class="text-center">Thank you for taking the quiz!</p>
 </div>
 {% endblock %}
