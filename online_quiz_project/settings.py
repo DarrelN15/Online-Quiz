@@ -157,7 +157,3 @@ LOGGING = {
 LOGIN_REDIRECT_URL = '/'  # Redirects users to the home page after successful login
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Directory where static files will be collected for deployment
-
-STATICFILES_DIRS = [
-    BASE_DIR / "static",  # Directory where static files are stored during development
-]
