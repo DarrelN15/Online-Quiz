@@ -5,7 +5,10 @@
 <html>
 <head>
     <title>{{ quiz.title }}</title> <!-- Sets the page title to the quiz title -->
-    <link href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet"> <!-- Links to Bootstrap CSS for styling -->
+    <link href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+    <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+ <!-- Links to Bootstrap CSS for styling -->
     <style>
         .quiz-content {
             user-select: none; <!-- Disables text selection within the quiz content -->
