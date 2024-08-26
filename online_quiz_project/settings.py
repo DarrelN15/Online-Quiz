@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 import os
 from pathlib import Path
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -78,15 +79,21 @@ WSGI_APPLICATION = 'online_quiz_project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'online_quiz_db',
+#         'USER': 'postgres',
+#         'PASSWORD': 'burundi15',
+#         'HOST': 'localhost',  # PostgreSQL server's address
+#         'PORT': '5432',  # default PostgreSQL port
+#     }
+# }
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'online_quiz_db',
-        'USER': 'postgres',
-        'PASSWORD': 'burundi15',
-        'HOST': 'localhost',  # or your PostgreSQL server's address
-        'PORT': '5432',  # default PostgreSQL port
-    }
+    'default': dj_database_url.config(
+        default=os.getenv('DATABASE_URL')
+    )
 }
 
 
