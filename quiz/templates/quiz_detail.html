@@ -5,14 +5,14 @@
 <html>
 <head>
     <title>{{ quiz.title }}</title> <!-- Sets the page title to the quiz title -->
-    <link rel="stylesheet" href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}">
-    <script src="{% static 'bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
  <!-- Links to Bootstrap CSS for styling -->
-    <style>
+    {% comment %} <style>
         .quiz-content {
             user-select: none; <!-- Disables text selection within the quiz content -->
         }
-    </style>
+    </style> {% endcomment %}
 </head>
 <body style="margin-top: 75px;">
     <!-- Navigation bar at the top of the page -->
