@@ -7,7 +7,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Ensures proper scaling on mobile devices -->
     <title>{% block title %}Online Quiz{% endblock %}</title> <!-- Sets the title of the page, can be overridden by child templates -->
     <!-- Bootstrap CSS -->
-    <link href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet"> <!-- Links to Bootstrap CSS for styling -->
+    {% comment %} <link href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet">  {% endcomment %}
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+<!-- Links to Bootstrap CSS for styling -->
     <style>
         html, body {
             height: 100%;
