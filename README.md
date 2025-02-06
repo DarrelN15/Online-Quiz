@@ -14,6 +14,8 @@
 
 ## Overview
 
+![Online Quiz Homepage](homepage.png)
+
 This project is a Django-based online quiz application that allows users to participate in quizzes, view their results, and manage quizzes through an admin interface. The project is built using Django 5.0.7 and has been configured to use a PostgreSQL database for data management.
 
 ## Features
